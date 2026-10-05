@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0e2c57">
+<title>Shop Pen Plotter 36 x 48</title>
+<meta name="description" content="Proposal to build a 36 x 48 in pen plotter in the shop: cost three ways, shop time, the machine, and a small first test order.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Shop Pen Plotter 36 x 48">
+<meta property="og:description" content="Proposal to build a 36 x 48 in pen plotter in the shop: cost three ways, shop time, the machine, and a small first test order.">
+<meta property="og:image" content="https://ntrpydev.github.io/shop-pen-plotter/assets/og.jpg">
+<meta property="og:url" content="https://ntrpydev.github.io/shop-pen-plotter/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%230e2c57'/%3E%3Cpath d='M4 27 Q12 19 17 23 T28 17' fill='none' stroke='%23eaf2fc' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M19 4 L25 10 L17 18 L13 14 Z' fill='none' stroke='%23ffd27a' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M13 14 L11 20 L17 18' fill='%23ffd27a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="draft" id="draft" hidden>
+  <div class="wrap mono">Draft: some figures are not in yet and show as TBD (<span id="draft-list"></span>).</div>
+</div>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="kicker">Proposal for the shop</p>
+      <h1>Shop Pen Plotter <span class="h1-size">36 x 48</span></h1>
+      <p class="lede" data-text="content.what_it_does">A flatbed pen plotter for white-on-blue engineering and architectural prints, built in the shop.</p>
+      <dl class="headline" aria-label="Headline numbers">
+        <div class="stat">
+          <dt>Recommended build</dt>
+          <dd><span class="big money" data-count="recTotal" data-round>--</span><span class="when" data-text="recDateLine"></span></dd>
+        </div>
+        <div class="stat">
+          <dt>Buy pre-built</dt>
+          <dd><span class="big money" data-count="preTotal" data-round>--</span><span class="when" data-text="preDateLine"></span></dd>
+        </div>
+        <div class="stat stat-save">
+          <dt>Saved by building</dt>
+          <dd><span class="big money" data-count="saveRec" data-round>--</span><span class="when">on parts; shop time in section C</span></dd>
+        </div>
+      </dl>
+      <noscript><p class="note">The figures on this page load from its data files and need JavaScript.</p></noscript>
+    </div>
+
+    <figure class="sheet-fig">
+      <div class="sheet-frame">
+        <span class="zl zl-t" aria-hidden="true"><i>4</i><i>3</i><i>2</i><i>1</i></span>
+        <span class="zl zl-l" aria-hidden="true"><i>B</i><i>A</i></span>
+        <div class="plot" id="plot">
+          <img src="assets/drawing.svg" alt="Plotted drawing of the gantry end plate: outline, bolt holes and overall dimensions" width="234" height="205">
+        </div>
+        <span class="pen-status mono" id="pen-status" aria-hidden="true"></span>
+      </div>
+      <figcaption>Gantry end plate, drawn from the shop DXF. This is the kind of linework the machine puts on paper.</figcaption>
+    </figure>
+  </div>
+
+  <div class="wrap">
+    <div class="titleblock mono" role="group" aria-label="Title block">
+      <div class="tb-cell tb-title"><span>Title</span><b>Shop Pen Plotter 36 x 48</b></div>
+      <div class="tb-cell"><span>Dwg no.</span><b>PP-000</b></div>
+      <div class="tb-cell"><span>Rev</span><b><svg class="revtri" viewBox="0 0 20 18" aria-hidden="true"><path d="M10 1.5 L18.5 16.5 H1.5 Z"/></svg>C</b></div>
+      <div class="tb-cell"><span>Date</span><b>2026-10-05</b></div>
+      <div class="tb-cell"><span>Scale</span><b>NTS</b></div>
+      <div class="tb-cell"><span>Drawn</span><b>Noah</b></div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="sec" id="ask" aria-labelledby="ask-h">
+  <div class="wrap">
+    <header class="sec-head"><span class="zone" aria-hidden="true">A</span><h2 id="ask-h">The ask</h2><span class="dimline" aria-hidden="true"></span></header>
+    <p class="ask" data-text="content.ask">Approve a staged parts budget to build the plotter in the shop, starting with a small test order.</p>
+    <p class="prose">Nothing is bought all at once. Stage 1 is a small test order that checks the design before any metal is cut. Each later stage is ordered when the build reaches it, so the spend can stop at any point.</p>
+    <ol class="stages" id="stages" aria-label="Order stages"></ol>
+    <p class="note" data-text="recNoteLine"></p>
+  </div>
+</section>
+
+<section class="sec" id="cost" aria-labelledby="cost-h">
+  <div class="wrap">
+    <header class="sec-head"><span class="zone" aria-hidden="true">B</span><h2 id="cost-h">Cost: build it or buy it</h2><span class="dimline" aria-hidden="true"></span></header>
+    <p class="prose">The same job, three ways. Build prices are parts only. Building also takes shop time, which is laid out in section C.</p>
+
+    <div class="cards">
+      <article class="card" id="card-cheap" aria-labelledby="card-cheap-h">
+        <header><p class="card-tag">Option 1</p><h3 id="card-cheap-h">Cheapest build</h3></header>
+        <p class="card-total"><span class="money" data-count="cheapTotal">--</span></p>
+        <p class="when" data-text="cheapDateLine"></p>
+        <dl class="rows" id="rows-cheap"></dl>
+      </article>
+      <article class="card card-rec" id="card-rec" aria-labelledby="card-rec-h">
+        <header><p class="card-tag">Option 2 <span class="pick">Recommended</span></p><h3 id="card-rec-h">Recommended build</h3></header>
+        <p class="card-total"><span class="money" data-count="recTotal">--</span></p>
+        <p class="when" data-text="recDateLine"></p>
+        <dl class="rows" id="rows-rec"></dl>
+      </article>
+      <article class="card" id="card-pre" aria-labelledby="card-pre-h">
+        <header><p class="card-tag">Option 3</p><h3 id="card-pre-h">Buy pre-built</h3></header>
+        <p class="card-total"><span class="money" data-count="preTotal">--</span></p>
+        <p class="when" data-text="preDateLine"></p>
+        <dl class="rows" id="rows-pre"></dl>
+      </article>
+    </div>
+
+    <figure class="chart" aria-labelledby="chart-cap">
+      <figcaption id="chart-cap" class="chart-cap">Totals drawn to one scale</figcaption>
+      <div class="bars" id="bars"></div>
+      <div class="savings" id="savings"></div>
+    </figure>
+
+    <details class="more" id="others-wrap" hidden>
+      <summary>Other pre-built machines checked</summary>
+      <div class="table-wrap"><table class="data stack" id="others"></table></div>
+    </details>
+  </div>
+</section>
+
+<section class="sec" id="shop" aria-labelledby="shop-h">
+  <div class="wrap">
+    <header class="sec-head"><span class="zone" aria-hidden="true">C</span><h2 id="shop-h">What the shop puts in</h2><span class="dimline" aria-hidden="true"></span></header>
+    <p class="prose">Building is cheaper on parts, but it is not free. These hours come off the machines and off the bench. They are estimates, not measured times, and they would be fitted around paying work.</p>
+    <dl class="tiles" id="shop-tiles"></dl>
+    <div class="two">
+      <div class="panel">
+        <h3>What the shop already has</h3>
+        <ul class="ticks">
+          <li>Haas mills to run the shop-part programs in section E</li>
+          <li>A 3D printer for the printed parts (pen tools, straps, brackets)</li>
+          <li>Stock on the shelf that may cover some blanks; the aluminium is priced in stage 2 either way</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Printed parts</h3>
+        <ul class="plain mono" id="printed"></ul>
+      </div>
+    </div>
+    <details class="more">
+      <summary>How the hours were estimated</summary>
+      <ul class="plain" id="shop-assume"></ul>
+    </details>
+  </div>
+</section>
+
+<section class="sec" id="machine" aria-labelledby="machine-h">
+  <div class="wrap">
+    <header class="sec-head"><span class="zone" aria-hidden="true">D</span><h2 id="machine-h">The machine</h2><span class="dimline" aria-hidden="true"></span></header>
+    <figure class="view view-main">
+      <div class="view-body">
+        <img id="heroimg" src="assets/iso.jpg" alt="Rendered pen plotter on its table, gantry midway over a blue sheet, pen head with orange printed parts" width="1400" height="1000" loading="lazy">
+        <canvas id="viewer" hidden></canvas>
+      </div>
+      <div class="viewbar">
+        <span class="mono view-label">View 1 &nbsp;Iso</span>
+        <span id="vstate" class="vstate" aria-live="polite">Rendered from the CAD assembly.</span>
+        <button class="btn" id="open3d" type="button">Open 3D model</button>
+      </div>
+    </figure>
+    <div class="views">
+      <figure class="view"><div class="view-body"><img src="assets/head-down.jpg" alt="Pen head with the pen down: printed pen tool and straps, lift tab, weight slugs, servo with its horn below the ledge" loading="lazy"></div><figcaption><span class="mono view-label">View 2</span>Pen down: the horn sits below the ledge, so only the head's weight presses the pen</figcaption></figure>
+      <figure class="view"><div class="view-body"><img src="assets/head-up.jpg" alt="Pen head with the pen up: the servo horn has swung up under the lift tab ledge" loading="lazy"></div><figcaption><span class="mono view-label">View 3</span>Pen up: the horn lifts the ledge, the dock and the pen tool clear of the sheet</figcaption></figure>
+      <figure class="view"><div class="view-body"><img src="assets/gantry.jpg" alt="Right end of the gantry with the end plate, Y rail and belt" loading="lazy"></div><figcaption><span class="mono view-label">View 4</span>Gantry end: the end plate on the Y blocks, bolted into the beam's tapped bores</figcaption></figure>
+      <figure class="view"><div class="view-body"><img src="assets/back.jpg" alt="The machine seen from the back" loading="lazy"></div><figcaption><span class="mono view-label">View 5</span>From the back: Y motors on the angle brackets, home switches at the front</figcaption></figure>
+    </div>
+    <div class="table-wrap">
+      <table class="data specs" id="specs"><caption>Specifications</caption></table>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="parts" aria-labelledby="parts-h">
+  <div class="wrap">
+    <header class="sec-head"><span class="zone" aria-hidden="true">E</span><h2 id="parts-h">Shop parts</h2><span class="dimline" aria-hidden="true"></span></header>
+    <p class="prose" id="parts-intro">Every machined part has a Haas program, checked by an automatic verifier and backplotted. Cycle times are estimates from the programs.</p>
+    <div class="table-wrap">
+      <table class="data programs" id="programs"><caption class="sr">Haas programs</caption></table>
+    </div>
+    <div class="views views-3">
+      <figure class="view"><div class="view-body light"><img src="assets/bp-carriage.jpg" alt="Backplot of the pen carriage program" loading="lazy"></div><figcaption>Backplot: pen carriage plate</figcaption></figure>
+      <figure class="view"><div class="view-body light"><img src="assets/bp-dock.jpg" alt="Backplot of the pen dock program" loading="lazy"></div><figcaption>Backplot: pen dock</figcaption></figure>
+      <figure class="view"><div class="view-body light"><img src="assets/bp-xidler.jpg" alt="Backplot of the X idler carrier program" loading="lazy"></div><figcaption>Backplot: X idler carrier</figcaption></figure>
+    </div>
+    <p><a class="btn" href="assets/machined-parts-drawings.pdf">Open the machined-part drawings (PDF)</a></p>
+  </div>
+</section>
+
+<section class="sec" id="sheet" aria-labelledby="sheet-h">
+  <div class="wrap">
+    <header class="sec-head"><span class="zone" aria-hidden="true">F</span><h2 id="sheet-h">Parts sheet</h2><span class="dimline" aria-hidden="true"></span></header>
+    <p class="prose">The recommended build, grouped by order stage. Every line, part number and vendor link is in the buy list.</p>
+    <div class="table-wrap">
+      <table class="data stack stage-table" id="stage-table"><caption class="sr">Recommended build by order stage</caption></table>
+    </div>
+    <div class="two">
+      <div class="panel">
+        <h3>Same parts, by category</h3>
+        <div class="table-wrap"><table class="data compact" id="group-table"></table></div>
+      </div>
+      <div class="panel">
+        <h3 data-text="content.supplies.label">Pens, film and paper</h3>
+        <div class="table-wrap"><table class="data compact" id="supplies-table"></table></div>
+      </div>
+    </div>
+    <p><a class="btn" href="assets/buy-list.csv" download>Download the full buy list (CSV)</a></p>
+    <details class="more">
+      <summary>Cheapest build: full parts list</summary>
+      <p class="note" data-text="cheapDateLine"></p>
+      <div class="table-wrap"><table class="data compact" id="cheap-groups"></table></div>
+      <div class="table-wrap"><table class="data stack cheap-lines" id="cheap-lines"></table></div>
+    </details>
+  </div>
+</section>
+
+<section class="sec" id="checks" aria-labelledby="checks-h">
+  <div class="wrap">
+    <header class="sec-head"><span class="zone" aria-hidden="true">G</span><h2 id="checks-h">How we de-risk it</h2><span class="dimline" aria-hidden="true"></span></header>
+    <div class="two">
+      <div class="panel">
+        <h3>Already checked in CAD and CAM</h3>
+        <ul class="ticks" id="checklist"></ul>
+      </div>
+      <div class="panel panel-mark">
+        <h3>First step: the slide test</h3>
+        <p data-text="content.risk_first">Before the pen dock is cut, a small slide test checks the pen-lift slide. If it fails, the slide is redesigned before any metal is cut for the head.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid mono">
+    <p>Prepared by Noah · 2026-10-05</p>
+    <p>Prices read 2026-10-05; links in the <a href="assets/buy-list.csv">buy list</a>.</p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
