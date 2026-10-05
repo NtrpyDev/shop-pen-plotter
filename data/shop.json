@@ -1,0 +1,200 @@
+{
+ "programs": [
+  {
+   "program": "O60011_END_PLATE_OP1.nc",
+   "part": "Gantry end plate OP1",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 3.3
+  },
+  {
+   "program": "O60021_PEN_CARRIAGE_OP1.nc",
+   "part": "Pen carriage plate OP1",
+   "qty": 1,
+   "setups": 1,
+   "est_minutes": 3.1
+  },
+  {
+   "program": "O60031_PEN_DOCK_OP1.nc",
+   "part": "Pen dock OP1",
+   "qty": 1,
+   "setups": 1,
+   "est_minutes": 4.1
+  },
+  {
+   "program": "O60051_X_MOTOR_PLATE_OP1.nc",
+   "part": "X motor / idler plate OP1",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 7.9
+  },
+  {
+   "program": "O60061_X_CLAMP_BAR_OP1.nc",
+   "part": "X belt clamp bar OP1",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 0.3
+  },
+  {
+   "program": "O60071_Y_CLAMP_BAR_OP1.nc",
+   "part": "Y belt clamp bar OP1",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 0.5
+  },
+  {
+   "program": "O60081_Y_BRACKET_A_OP1.nc",
+   "part": "Y motor/idler bracket A OP1",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 1.5
+  },
+  {
+   "program": "O60082_Y_BRACKET_A_OP2.nc",
+   "part": "Y motor/idler bracket A OP2",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 0.9
+  },
+  {
+   "program": "O60091_Y_BRACKET_B_OP1.nc",
+   "part": "Y motor/idler bracket B (mirror of A) OP1",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 1.5
+  },
+  {
+   "program": "O60092_Y_BRACKET_B_OP2.nc",
+   "part": "Y motor/idler bracket B (mirror of A) OP2",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 0.9
+  },
+  {
+   "program": "O60101_Y_IDLER_CARRIER_OP1.nc",
+   "part": "Y idler carrier OP1",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 0.4
+  },
+  {
+   "program": "O60111_X_TENSION_BLOCK_OP1.nc",
+   "part": "X belt tension block OP1",
+   "qty": 1,
+   "setups": 1,
+   "est_minutes": 0.7
+  },
+  {
+   "program": "O60112_X_TENSION_BLOCK_OP2.nc",
+   "part": "X belt tension block OP2",
+   "qty": 1,
+   "setups": 1,
+   "est_minutes": 0.5
+  },
+  {
+   "program": "O60121_PAPER_STOP_OP1.nc",
+   "part": "Paper corner stop bar OP1",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 0.5
+  },
+  {
+   "program": "O60131_X_BELT_SPACER_OP1.nc",
+   "part": "X belt spacer OP1",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 0.3
+  },
+  {
+   "program": "O60141_X_IDLER_CARRIER_OP1.nc",
+   "part": "X idler carrier OP1",
+   "qty": 1,
+   "setups": 1,
+   "est_minutes": 1.4
+  }
+ ],
+ "total_cycle_hours": 0.8,
+ "setup_hours_estimate": 8.5,
+ "assumptions": [
+  "Rapids at 1000 ipm; feed moves at the programmed F; arcs and helical moves use true path length.",
+  "Canned cycles: G81/G84/G85 feed from R to Z (G84 and G85 feed in and out at F); G83 pecks by Q with rapid back to R and rapid down again.",
+  "Tool changes 5 s each; optional stops (M01) and dwell ignored.",
+  "Setup 15 min per program (16 programs, 1 setup each), plus 10 min per blank to saw and square (27 blanks, one per part run).",
+  "Estimate only: no machine acceleration, no operator load/unload time. Feeds are the conservative values in the programs.",
+  "Total spindle time = sum of (estimate per part x quantity) = 0.8 h; setup and blank prep = 4.0 h + 4.5 h."
+ ],
+ "printed": {
+  "parts": [
+   {
+    "part": "SERVO_BRACKET",
+    "qty": 1,
+    "grams_each": 3.0
+   },
+   {
+    "part": "X_CHAIN_BRACKET",
+    "qty": 1,
+    "grams_each": 8.9
+   },
+   {
+    "part": "X_LIMIT_BRACKET",
+    "qty": 1,
+    "grams_each": 3.2
+   },
+   {
+    "part": "Y_LIMIT_BRACKET_R",
+    "qty": 1,
+    "grams_each": 2.4
+   },
+   {
+    "part": "Y_LIMIT_BRACKET_L",
+    "qty": 1,
+    "grams_each": 2.4
+   },
+   {
+    "part": "PEN_TOOL",
+    "qty": 3,
+    "grams_each": 16.5
+   },
+   {
+    "part": "PEN_STRAP",
+    "qty": 6,
+    "grams_each": 1.0
+   },
+   {
+    "part": "LIFT_TAB",
+    "qty": 1,
+    "grams_each": 2.5
+   },
+   {
+    "part": "DOCK_STOP",
+    "qty": 1,
+    "grams_each": 0.5
+   },
+   {
+    "part": "Y_IDLER_SPACER",
+    "qty": 2,
+    "grams_each": 0.3
+   },
+   {
+    "part": "X_IDLER_SPACER",
+    "qty": 1,
+    "grams_each": 0.3
+   },
+   {
+    "part": "PEN_SET_BLOCK",
+    "qty": 1,
+    "grams_each": 9.0
+   }
+  ],
+  "grams_est": 89,
+  "assumptions": [
+   "PETG 1.27 g/cm3, 0.5 effective infill factor applied to STL solid volume, quantities from printed-parts.md.",
+   "Excludes supports, purge, and failed prints."
+  ]
+ },
+ "labour_hours_estimate": {
+  "low": 19,
+  "high": 31,
+  "basis": "Rough estimate, not measured: frame 3-5 h, rails and gantry 4-6, carriage and head 2-3, belts 1-2, electronics and wiring 6-10, firmware and calibration 3-5."
+ }
+}
