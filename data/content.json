@@ -1,0 +1,144 @@
+{
+ "title": "Shop Pen Plotter 36x48",
+ "ask": "Approve a staged parts budget to build a 36 x 48 in pen plotter in-house, starting with a $166 test order.",
+ "what_it_does": "Draws white-on-blue architectural and engineering prints (and drafting film) up to ARCH E, 36 x 48 in, from SVG, PDF or DXF, with up to four pens per plot.",
+ "specs": [
+  [
+   "Sheet",
+   "up to 36 x 48 in (ARCH E), any ARCH / ANSI size"
+  ],
+  [
+   "Accuracy target",
+   "+/-0.2 mm over the sheet, 0.025 mm steps"
+  ],
+  [
+   "Speed",
+   "900-1500 mm/min drawing, about 10 m/min travel"
+  ],
+  [
+   "Motion",
+   "Hiwin MGN15 linear rails, Gates GT2 9 mm belts, closed-loop NEMA17 steppers"
+  ],
+  [
+   "Controller",
+   "FluidNC 6x, Wi-Fi + USB, G-code"
+  ],
+  [
+   "Pens",
+   "Sakura Gelly Roll white 08/10, Uni Posca PC-1MR / PC-3M, Rotring Isograph; 6-16 mm barrels"
+  ],
+  [
+   "Pen changes",
+   "quick-change printed pen tools, manual swap at the front; room reserved for an automatic pen rack"
+  ],
+  [
+   "Footprint",
+   "1.21 x 1.77 m on a 4 x 6 ft table"
+  ]
+ ],
+ "recommended": {
+  "label": "Recommended build (genuine brand parts)",
+  "total": 2712.85,
+  "notes": "Every line priced from a manufacturer, authorized distributor or reputable reseller on 2026-10-05. Shipping and tax not included. Three small items (M5 washers, 6x3 mm magnets, rubber strip) not yet priced.",
+  "groups": [
+   [
+    "Motion",
+    1444.99,
+    "Hiwin MGN15 rails and blocks, MGN9 slide, Gates belt and pulleys, 3 StepperOnline closed-loop motor kits, Hitec servo and aluminium horn"
+   ],
+   [
+    "Frame & fasteners",
+    386.78,
+    "80/20 2040 extrusion, MISUMI 40x80 beam end-tapped, T-nuts, Bolt Depot stainless screws, dowels, heat-set inserts"
+   ],
+   [
+    "Bed",
+    303.02,
+    "3/4 in MDF, galvanized steel facing, 30 rubber-coated magnets, contact cement"
+   ],
+   [
+    "Electronics",
+    450.18,
+    "FluidNC 6x controller, Mean Well 24 V supply, E-stop, Omron switches, igus cable chains and cable, enclosure"
+   ],
+   [
+    "Aluminium stock for shop parts",
+    127.88,
+    "1/4 in 6061 plate 12 x 24, 4 x 4 x 1/4 angle, 1 x 1 bar"
+   ]
+  ],
+  "stages": [
+   [
+    "1",
+    "Test parts (order now)",
+    145.61,
+    "MGN9 slide, servo + horn, Gates pulleys and idlers: confirms the design before any cutting. Pens for measuring add $20.10 (supplies)."
+   ],
+   [
+    "2",
+    "Shop stock and screws",
+    174.94,
+    "Aluminium plate, angle, bar, all Bolt Depot screws, heat-set inserts: everything needed to run the 16 Haas programs and print the parts."
+   ],
+   [
+    "3",
+    "Frame",
+    339.72,
+    "80/20 extrusion, T-nuts, corner brackets, MISUMI beam and dowels."
+   ],
+   [
+    "4",
+    "Motion",
+    1299.38,
+    "Hiwin rails and blocks, closed-loop motor kits, Gates belt."
+   ],
+   [
+    "5",
+    "Bed",
+    303.02,
+    "MDF, galvanized steel, magnets, contact cement."
+   ],
+   [
+    "6",
+    "Electronics",
+    450.18,
+    "Controller, power supply, E-stop, switches, cable chains, cable, enclosure."
+   ]
+  ]
+ },
+ "supplies": {
+  "label": "Pens, film and paper (not in any machine total)",
+  "items": [
+   [
+    "Gelly Roll and Posca test pens",
+    20.1
+   ],
+   [
+    "Rotring Isograph 3-pen set",
+    86.3
+   ],
+   [
+    "Dura-Lar matte film 40 in x 12 ft",
+    40.31
+   ],
+   [
+    "Blue bond, 2 rolls 36 in x 500 ft",
+    164.55
+   ]
+  ]
+ },
+ "shop_parts": {
+  "machined_parts": 13,
+  "setups": 16,
+  "printed_parts": "3 pen tools, 6 straps, lift tab, servo bracket, X chain bracket, 3 switch brackets, dock stop, 3 idler spacers, pen setting block"
+ },
+ "checks": [
+  "16/16 Haas programs pass an automatic verifier and are backplotted",
+  "Hole-alignment fit check: 0 failures",
+  "Collision check at all 4 travel corners, pen up and down: 0 interferences",
+  "Independent review read the changed programs line by line and swept the pen lift through its full travel"
+ ],
+ "risk_first": "Before cutting the pen dock, a $59 slide test measures seal drag on the pen-lift slide (Hiwin does not publish it). If it is too high, the slide is redesigned before any metal is cut for the head.",
+ "build_sources": "Prices and specs: plotter/bom/buy-list.csv (with every vendor link).",
+ "date": "2026-10-05"
+}
