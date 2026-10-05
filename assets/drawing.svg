@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 234 205" fill="none" stroke="#eaf2fc" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round">
+<g class="part">
+<path class="pl" pathLength="1" d="M0,175 L200,175 L200,0 L0,0 Z"/>
+<circle class="pl" cx="42.5" cy="162.5" r="3.3"/>
+<circle class="pl" cx="42.5" cy="137.5" r="3.3"/>
+<circle class="pl" cx="67.5" cy="162.5" r="3.3"/>
+<circle class="pl" cx="67.5" cy="137.5" r="3.3"/>
+<circle class="pl" cx="132.5" cy="162.5" r="3.3"/>
+<circle class="pl" cx="132.5" cy="137.5" r="3.3"/>
+<circle class="pl" cx="157.5" cy="162.5" r="3.3"/>
+<circle class="pl" cx="157.5" cy="137.5" r="3.3"/>
+<circle class="pl" cx="90" cy="100" r="5.3"/>
+<circle class="pl" cx="90" cy="40" r="5.3"/>
+<circle class="pl" cx="110" cy="100" r="5.3"/>
+<circle class="pl" cx="110" cy="40" r="5.3"/>
+<circle class="pl" cx="68" cy="76" r="1.5"/>
+<circle class="pl" cx="68" cy="76" r="1.25"/>
+<circle class="pl" cx="68" cy="58" r="1.5"/>
+<circle class="pl" cx="68" cy="58" r="1.25"/>
+<circle class="pl" cx="132" cy="76" r="1.5"/>
+<circle class="pl" cx="132" cy="76" r="1.25"/>
+<circle class="pl" cx="132" cy="58" r="1.5"/>
+<circle class="pl" cx="132" cy="58" r="1.25"/>
+<circle class="pl" cx="87" cy="13.65" r="2.75"/>
+<circle class="pl" cx="113" cy="13.65" r="2.75"/>
+<circle class="pl" cx="60" cy="35" r="1.5"/>
+<circle class="pl" cx="60" cy="35" r="1.25"/>
+<circle class="pl" cx="60" cy="15" r="1.5"/>
+<circle class="pl" cx="60" cy="15" r="1.25"/>
+<circle class="pl" cx="140" cy="35" r="1.5"/>
+<circle class="pl" cx="140" cy="35" r="1.25"/>
+<circle class="pl" cx="140" cy="15" r="1.5"/>
+<circle class="pl" cx="140" cy="15" r="1.25"/>
+</g>
+<g class="dim" stroke-width="0.35" fill="#eaf2fc">
+<path d="M0,176 L0,185 M200,176 L200,185 M200,0 L210,0 M200,175 L210,175"/>
+<path d="M0,183 L200,183 M0,183 L3,182.1 L3,183.9 Z M200,183 L197,183.9 L197,182.1 Z"/>
+<path d="M208,0 L208,175 M208,0 L208.9,3 L207.1,3 Z M208,175 L207.1,172 L208.9,172 Z"/>
+<text font-family="IBM Plex Mono, monospace" font-size="5" stroke="none" x="100.0" y="181" text-anchor="middle">200</text>
+<text font-family="IBM Plex Mono, monospace" font-size="5" stroke="none" x="206" y="87.5" text-anchor="middle" transform="rotate(-90 206 87.5)">175</text>
+</g>
+</svg>
