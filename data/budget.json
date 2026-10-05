@@ -1,0 +1,385 @@
+{
+ "total": 410.57,
+ "currency": "USD",
+ "date": "2026-10-05",
+ "accuracy_expectation": "Expect about +/-0.5 mm over the full 36 x 48 in sheet after calibration (an estimate, not a measurement), against +/-0.2 mm for the recommended build.",
+ "summary": "Same machine layout built from generic marketplace parts: V-slot extrusion with plastic V-wheels instead of linear rails, open-loop motors on a $30 controller, MDF bed with tape. Shipping included; shop-made brackets come from scrap and are not in the total.",
+ "tradeoffs": [
+  "The CAD, Haas programs and printed parts are built around the rails and servo of the recommended build. The wheel plates, carriage and servo mount have to be redesigned and re-verified, and that time is not in the total.",
+  "Open-loop motors: a skipped step (snag, belt slip) is not detected, so a plot can go off without warning.",
+  "Plastic V-wheels on generic extrusion: no straightness figure, wheels need preload set by hand and wear over time.",
+  "No steel bed or magnets: paper is taped down, which is slower and can lift on large sheets."
+ ],
+ "risks": [
+  "Redesign time: the existing CAD and the 16 Haas programs do not fit V-wheels, the MG90S or the DLC32 as they are. The new end plates, carriage and mounts are unpriced engineering and machining hours.",
+  "Accuracy is not proven. +/-0.5 mm is an estimate built on belt-stretch data for a generic 6 mm GT2 belt and an assumed 2-5 N rolling drag that has not been measured. Wheel preload drift, POM flat spots or a bent extrusion could push the error past that, and open-loop motors will not report lost steps.",
+  "Marketplace volatility: several lowest-price listings were nearly sold out on 2026-10-05 (MGN9 1 left, A4988 4 left, pulleys 4 left, motors 5 left). The DLC32 sale ends Oct 7 (regular $34.23) and the extrusion was a limited-time deal. Another seller's '2040 V-slot' listing has a review saying it arrived as T-slot, so check the profile on arrival.",
+  "The E-stop is rated 660 V 10 A, but the page gives no DC breaking rating, and it sits in the 24 V DC line.",
+  "Masking tape hold-down on blue bond can lift or tear a sheet, and the bed is not magnetic, so the recommended paper stops and magnet workflow does not apply.",
+  "The servo signal on the DLC32 laser header (gpio.32) comes from a community FluidNC config. Whether that header buffers or inverts the signal was not verified; check it on the bench before building the pen lift."
+ ],
+ "groups": [
+  [
+   "Frame",
+   120.29,
+   "Five 2 m generic 2040 V-slot bars sawn to the frame, which is also the Y and X track; brackets and T-nuts"
+  ],
+  [
+   "Motion",
+   104.75,
+   "POM V-wheels, generic 9 mm GT2 belt and pulleys, three open-loop NEMA17s, MG90S pen-lift servo, MGN9 pen slide"
+  ],
+  [
+   "Electronics",
+   100.01,
+   "MKS DLC32 (FluidNC) with A4988 drivers, 24 V brick, buck for the servo, switches, E-stop, one drag chain, cable"
+  ],
+  [
+   "Bed",
+   55.56,
+   "3/4 in MDF bed with masking tape hold-down"
+  ],
+  [
+   "Fasteners & pen tools",
+   29.96,
+   "Screw assortment plus dowels, magnets and inserts for the printed pen tools"
+  ]
+ ],
+ "lines": [
+  {
+   "group": "Frame",
+   "item": "2040 V-slot extrusion, 2000 mm, 5-pack",
+   "spec": "6063-T5, black anodized. Saw to: 2 x 1650 (Y side members = Y rails), 2 x 1030 (cross members), 1 x 1102 (X beam = X rail). Offcuts 2 x 350, 2 x 970, 1 x 898.",
+   "qty": 1,
+   "unit": 104.31,
+   "ext": 104.31,
+   "vendor": "Amazon.com (VEVOR brand)",
+   "url": "https://www.amazon.com/dp/B0H1V17GZZ",
+   "label": "RETAILER",
+   "notes": "Sold and shipped by Amazon.com, FREE delivery (shipping included). Variant: Black / V 2040-2000mm / 5. Limited-time deal (-10%, typical $115.90). Listing gives no straightness figure. Page: amz_i_B0H1V17GZZ.txt"
+  },
+  {
+   "group": "Frame",
+   "item": "Inside corner brackets, 20-series, 20 pcs",
+   "spec": "Hidden L brackets with set screws (8 used for the frame corners)",
+   "qty": 1,
+   "unit": 9.99,
+   "ext": 9.99,
+   "vendor": "BLCCLOY (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B08D6T9CGN",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: 20Pcs Interior Bracket with Screw."
+  },
+  {
+   "group": "Frame",
+   "item": "M5 T-nuts, 20-series, 100 pcs",
+   "spec": "Hammer-head drop-in, nickel-plated steel (motor brackets, switch and chain mounts, bed stops)",
+   "qty": 1,
+   "unit": 5.99,
+   "ext": 5.99,
+   "vendor": "HELIFOUNER (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0B1LTRYR5",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: M5 (100 PCS)."
+  },
+  {
+   "group": "Motion",
+   "item": "V-wheels, POM, 24 mm OD, 625ZZ bearings, 10-pack",
+   "spec": "12 used: 4 per gantry end plate, 4 on the X carriage; 8 spare",
+   "qty": 2,
+   "unit": 9.49,
+   "ext": 18.98,
+   "vendor": "Creality CL Store (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B09QPG7XGR",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Creality's own Amazon store. $0.95 per wheel."
+  },
+  {
+   "group": "Motion",
+   "item": "Eccentric spacer + isolation column kit (10 + 10, plus 10 small POM wheels)",
+   "spec": "6 eccentric spacers for wheel preload, 6 plain spacers; the 10 small wheels are spares",
+   "qty": 1,
+   "unit": 9.44,
+   "ext": 9.44,
+   "vendor": "Yeebyee (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0GT95QQ1K",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: 30pcs/set Small Wheels+Eccentric Column. -50% deal (typical $18.89); only 19 left on 2026-10-05. Spacer height not stated on the page."
+  },
+  {
+   "group": "Motion",
+   "item": "M5 x 35 socket head cap screws, 35 pcs",
+   "spec": "12.9 alloy steel; wheel axles (12) and idler axles (3)",
+   "qty": 1,
+   "unit": 4.49,
+   "ext": 4.49,
+   "vendor": "Sutemribor (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0CZRRV41V",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0."
+  },
+  {
+   "group": "Motion",
+   "item": "GT2 timing belt, 9 mm wide, 10 m",
+   "spec": "Generic fibreglass/rubber GT2. Need about 8.9 m: 2 Y loops about 3.34 m each + X loop about 2.24 m",
+   "qty": 1,
+   "unit": 16.99,
+   "ext": 16.99,
+   "vendor": "SeekLiny (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0CX1GH4LV",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: 9mm / 1. Only 11 left. Only about 1.1 m spare: measure before cutting."
+  },
+  {
+   "group": "Motion",
+   "item": "GT2 pulley, 20T, 5 mm bore, for 10 mm belt, 5-pack",
+   "spec": "3 used (one per motor), same 40 mm/rev as the recommended build",
+   "qty": 1,
+   "unit": 3.99,
+   "ext": 3.99,
+   "vendor": "OneBoat Online (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0GH7DLJY1",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: 10mm Belt / 20 Teeth 5mm Bore. Only 4 left."
+  },
+  {
+   "group": "Motion",
+   "item": "GT2 toothed idler, 20T, 5 mm bore, for 10 mm belt, 5-pack",
+   "spec": "3 used (X idler, 2 Y idlers)",
+   "qty": 1,
+   "unit": 7.99,
+   "ext": 7.99,
+   "vendor": "DiGiYes-US (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0BSPC6M1L",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Page lists 'Package Include: 5 x GT2 Timing Belt Idler Pulley', Number of Items 5. Variant: 10mm Belt / 20 Teeth Bore 5mm."
+  },
+  {
+   "group": "Motion",
+   "item": "NEMA17 stepper motor, 3-pack (open loop)",
+   "spec": "42 x 42 x 40 mm, 0.41 N-m holding, 1.5 A, 1.8 deg, 5 mm D-shaft, 1 m 4-lead cable",
+   "qty": 1,
+   "unit": 23.09,
+   "ext": 23.09,
+   "vendor": "YEJMKJ (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0FHHT93RS",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Only 5 left. Next cheapest seen: StepperOnline 42 N-cm 3-pack $25.99 (B0B38GHRH8)."
+  },
+  {
+   "group": "Motion",
+   "item": "MG90S metal-gear micro servo, 2-pack",
+   "spec": "180 deg, 9 g class; pen lift (1 used, 1 spare)",
+   "qty": 1,
+   "unit": 6.99,
+   "ext": 6.99,
+   "vendor": "Dorhea (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0DR5P4T9V",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: 2pcs 180degree. The servo bracket and lift tab must be redrawn for MG90S (the CAD uses a Hitec HS-5065MG)."
+  },
+  {
+   "group": "Motion",
+   "item": "MGN9 rail 100 mm + MGN9H block",
+   "spec": "Pen-lift slide (recommended design uses an MGN9 rail of 110 mm)",
+   "qty": 1,
+   "unit": 12.79,
+   "ext": 12.79,
+   "vendor": "Amadeo City (Amazon third party, uxcell brand)",
+   "url": "https://www.amazon.com/dp/B0D54K8XMM",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Only 1 left on 2026-10-05; fallback uxcell B0GYSNP1KF at $13.29 (search page)."
+  },
+  {
+   "group": "Electronics",
+   "item": "MKS DLC32 V2.1 controller board (board only)",
+   "spec": "ESP32, 3 StepStick sockets (X, Y, Z), 3 limit inputs, laser PWM header; runs FluidNC (community config: X/Y/Z on I2SO, limits gpio.36/35/34, PWM gpio.32). Z socket + Z limit used as Y2 for auto-squaring, servo on gpio.32.",
+   "qty": 1,
+   "unit": 25.84,
+   "ext": 25.84,
+   "vendor": "Usongshine Official Store (AliExpress)",
+   "url": "https://www.aliexpress.us/item/3256805856409003.html",
+   "label": "MARKETPLACE",
+   "notes": "Free shipping (delivery Oct 13-18). Variant selected: 'MKS DLC32'. Sale price ends Oct 7 2026; regular $34.23. Page: ali_i_dlc32_b.json"
+  },
+  {
+   "group": "Electronics",
+   "item": "A4988 StepStick driver, 5-pack with heat sinks",
+   "spec": "3 used (X, Y1, Y2), 2 spare; 1/16 microstep = 0.0125 mm per microstep",
+   "qty": 1,
+   "unit": 3.49,
+   "ext": 3.49,
+   "vendor": "zhugenerar (Amazon third party, Trinkrittey)",
+   "url": "https://www.amazon.com/dp/B0H1CKCSCX",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. -63% (list $9.49), only 4 left. Fallback: 5-pack $7.39 (B0GGRP7LB1) or TMC2209 5-pack $20.99 (B0G1R5GNJN)."
+  },
+  {
+   "group": "Electronics",
+   "item": "24 V 6 A (144 W) power brick",
+   "spec": "100-240 V AC in, 5.5 x 2.1 mm plug, includes screw-terminal adapter",
+   "qty": 1,
+   "unit": 16.98,
+   "ext": 16.98,
+   "vendor": "Auplf (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0CW598HV8",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0."
+  },
+  {
+   "group": "Electronics",
+   "item": "LM2596 buck converter, 2-pack",
+   "spec": "24 V to 5-6 V for the servo",
+   "qty": 1,
+   "unit": 4.99,
+   "ext": 4.99,
+   "vendor": "Dorhea (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0D7ZWVSFW",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: 2 pcs."
+  },
+  {
+   "group": "Electronics",
+   "item": "Mechanical endstop switches with 1 m 3-pin cables, 8 pcs",
+   "spec": "Normally open; 3 used (X, Y1, Y2)",
+   "qty": 1,
+   "unit": 4.99,
+   "ext": 4.99,
+   "vendor": "Qccan (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0BLTVNYF1",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. -50% (typical $9.99), only 8 left."
+  },
+  {
+   "group": "Electronics",
+   "item": "E-stop station, red mushroom, 1NO + 1NC",
+   "spec": "Wired in the 24 V DC line from the brick (cuts motors and controller)",
+   "qty": 1,
+   "unit": 9.99,
+   "ext": 9.99,
+   "vendor": "Baomain (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B00NTT91Y0",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: 1NC1NO. Rated 660 V 10 A; the page gives no DC breaking rating."
+  },
+  {
+   "group": "Electronics",
+   "item": "Drag chain 10 x 20 mm, R18, 1 m",
+   "spec": "Y axis only; the X servo cable rides a 3D-printed chain or a hanging loop",
+   "qty": 1,
+   "unit": 12.99,
+   "ext": 12.99,
+   "vendor": "Yeebyee (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0BGKC1BPZ",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: 10x20MM, with end connectors."
+  },
+  {
+   "group": "Electronics",
+   "item": "22 AWG 4-conductor cable, 50 ft",
+   "spec": "Unshielded, tinned stranded; X motor (about 4 m), servo + 5 V (about 4 m), Y switch runs (about 2.3 m x 2), 24 V feed",
+   "qty": 1,
+   "unit": 15.49,
+   "ext": 15.49,
+   "vendor": "LongLan Store (Amazon third party, HiFind brand)",
+   "url": "https://www.amazon.com/dp/B0DNQ9ZRWK",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: 50FT / 4 Conductors. Not high-flex chain cable."
+  },
+  {
+   "group": "Electronics",
+   "item": "Heat-shrink tubing kit, 580 pcs",
+   "spec": "For soldered splices (motor and switch cables extended by splicing, no crimp connectors)",
+   "qty": 1,
+   "unit": 5.25,
+   "ext": 5.25,
+   "vendor": "BGGS (Amazon third party, Bates)",
+   "url": "https://www.amazon.com/dp/B09BW21RGP",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0."
+  },
+  {
+   "group": "Bed",
+   "item": "3/4 in MDF, 4 x 8 ft sheet",
+   "spec": "Cut to about 1026 x 1600 mm bed; screwed to the existing table",
+   "qty": 1,
+   "unit": 49.98,
+   "ext": 49.98,
+   "vendor": "The Home Depot (ULTRASTOCK)",
+   "url": "https://www.homedepot.com/p/ULTRASTOCK-3-4-in-x-4-ft-x-8-ft-MDF-Panel-D11612490970000/304325742",
+   "label": "RETAILER",
+   "notes": "Hays, KS store price, in-store pickup (14 in stock); truck delivery would add $79, not included. Page: hd_mdf.html.txt"
+  },
+  {
+   "group": "Bed",
+   "item": "Masking tape, 1 in x 55 yd, 2 rolls",
+   "spec": "Paper hold-down at the sheet corners and edges (replaces steel sheet + magnets)",
+   "qty": 1,
+   "unit": 5.58,
+   "ext": 5.58,
+   "vendor": "RoraDirect (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0B24TQWT4",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0."
+  },
+  {
+   "group": "Fasteners & pen tools",
+   "item": "Metric socket head screw kit M2-M5, 860 pcs",
+   "spec": "12.9 steel; M2/M3/M4/M5 in 8, 10, 16, 20 mm, with nuts, washers, lock washers",
+   "qty": 1,
+   "unit": 9.99,
+   "ext": 9.99,
+   "vendor": "Yuezhong Store (Amazon third party, LuKaiSen)",
+   "url": "https://www.amazon.com/dp/B0DBLCHK48",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Lengths 8/10/16/20 only: the CAD's M3x12, M3x25 and flat-head screws need substitutes."
+  },
+  {
+   "group": "Fasteners & pen tools",
+   "item": "Dowel pins 4 x 12 mm, 15 pcs",
+   "spec": "304 stainless; pen-tool locating pins (2 used)",
+   "qty": 1,
+   "unit": 5.49,
+   "ext": 5.49,
+   "vendor": "HARFINGTON (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0F6D1SS59",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: M4 x 12mm / 15. Not a ground dowel: no tolerance stated."
+  },
+  {
+   "group": "Fasteners & pen tools",
+   "item": "Neodymium disc magnets 6 x 3 mm, 80 pcs",
+   "spec": "Pen-tool retention (8 used)",
+   "qty": 1,
+   "unit": 7.49,
+   "ext": 7.49,
+   "vendor": "Rhinocats Direct (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0FMP58G7B",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Variant: 6x3mm 80Pcs. Grade not stated."
+  },
+  {
+   "group": "Fasteners & pen tools",
+   "item": "M3 heat-set insert kit, 152 pcs (3 sizes)",
+   "spec": "Pen tools and straps (13 used)",
+   "qty": 1,
+   "unit": 6.99,
+   "ext": 6.99,
+   "vendor": "Vibit (Amazon third party)",
+   "url": "https://www.amazon.com/dp/B0FWWW8VP1",
+   "label": "MARKETPLACE",
+   "notes": "Ships from Amazon; free delivery on orders shipped by Amazon over $35 (this order clears that), shipping included = $0. Insert hole sizes differ from the Ruthex 4.0 mm holes in the printed-part CAD: adjust the holes."
+  }
+ ],
+ "summary_full": "The same flatbed gantry (two Y motors with auto-squaring, 36 x 48 in sheets, gravity pen with servo lift) built from generic marketplace parts: the 2040 V-slot frame doubles as the Y and X track for POM V-wheels, driven by open-loop NEMA17s on an MKS DLC32 running FluidNC. Gantry plates, brackets and pen tools are made in the shop from scrap aluminium and the 3D printer, which are not in the total; shipping is included (all lines ship free or are store pickup), sales tax is not.",
+ "tradeoffs_full": [
+  "vs the recommended build: POM V-wheels on generic V-slot replace Hiwin MGN15 rails. The VEVOR listing gives no straightness figure, the wheels need eccentric preload set by hand and re-checked, and POM wears.",
+  "vs the recommended build: open-loop NEMA17s on A4988 drivers replace StepperOnline closed-loop kits. A skipped step (snag, crash, belt slip) is not detected or corrected, so a plot can go off without warning.",
+  "vs the recommended build: a generic 9 mm GT2 belt replaces Gates. Same width and pulley ratio (40 mm per turn), but the pitch and stiffness are not certified, so steps/mm must be calibrated on a long test plot.",
+  "vs the recommended build: MDF with masking tape replaces the steel-faced bed with 30 magnets. Drops $253.04 of steel sheet, magnets and contact cement for $5.58 of tape, but taping is slower and the tape can lift on large sheets.",
+  "vs the recommended build: MG90S replaces the Hitec HS-5065MG and its aluminium horn. Centering repeatability is not published, and the servo bracket and lift tab must be redrawn for the MG90S body.",
+  "vs the recommended build: MKS DLC32 replaces the FluidNC 6x. It has exactly 3 driver sockets, so there are no spare axes for a future automatic pen rack, and the servo uses the laser PWM header.",
+  "vs the recommended build: no enclosure, IEC inlet or high-flex chainflex cable; plain 22 AWG cable and one drag chain on Y only.",
+  "vs the recommended build: the CAD, Haas programs and printed parts are built around MGN15 rails, CL42T drivers and the Hitec servo. The V-wheel gantry plates, carriage and servo mount must be redesigned and re-verified, which is shop and design time not in the dollar total."
+ ]
+}
