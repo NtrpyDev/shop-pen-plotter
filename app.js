@@ -1,13 +1,19 @@
-/* Shop Pen Plotter proposal: loads data/*.json, fills the page, runs the plotting animation.
-   Everything renders in its final state first; motion is layered on only when allowed. */
+/* Shop Pen Plotter proposal v2: loads data/*.json, fills the page, layers scroll motion on top.
+   Everything renders in its final state first. GSAP is optional: without it (or with reduced
+   motion, or without JS) the page is complete and still. */
 (() => {
   'use strict';
 
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const root = document.documentElement;
+  const mq = (q) => window.matchMedia(q);
+  const reduce = mq('(prefers-reduced-motion: reduce)').matches;
+  const hasGsap = () => !!(window.gsap && window.ScrollTrigger);
+  const $ = (sel, r = document) => r.querySelector(sel);
+  const $$ = (sel, r = document) => [...r.querySelectorAll(sel)];
   const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
   const has = (v) => v !== undefined && v !== null && v !== '';
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const BAR = 26, TOC = 40;
 
   /* ---------- formatting ---------- */
   function usd(v, round) {
@@ -21,6 +27,8 @@
   }
   const txt = (v) => (has(v) ? String(v) : 'TBD');
   const safeUrl = (u) => (typeof u === 'string' && /^https?:\/\//i.test(u) ? u : null);
+  const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  const word = (n) => WORDS[n] || String(n);
 
   /* Tiny element builder. Children may be strings (set as text, never HTML) or nodes. */
   function h(tag, attrs, ...kids) {
@@ -39,14 +47,76 @@
     }
     return n;
   }
-  /* Text that is exactly "TBD" gets the TBD style so placeholders stand out. */
+  const NS = 'http://www.w3.org/2000/svg';
+  function s(tag, attrs, ...kids) {
+    const n = document.createElementNS(NS, tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) if (v !== null && v !== undefined) n.setAttribute(k, String(v));
+    for (const k of kids.flat()) if (k !== null && k !== undefined) n.append(k instanceof Node ? k : document.createTextNode(String(k)));
+    return n;
+  }
   function val(v) {
-    const s = txt(v);
-    return /^TBD\b/.test(s) ? h('span', { class: 'tbd' }, s) : document.createTextNode(s);
+    const t = txt(v);
+    return /^TBD\b/.test(t) ? h('span', { class: 'tbd' }, t) : document.createTextNode(t);
   }
   function link(url, label) {
     const u = safeUrl(url);
     return u ? h('a', { href: u, rel: 'noopener noreferrer' }, label) : null;
+  }
+
+  /* ---------- count-up numbers ---------- */
+  function fmtCount(kind, x) {
+    switch (kind) {
+      case 'usd2': return usd(x);
+      case 'int': return num(x, 0);
+      case 'dec1': return num(x, 1);
+      default: return usd(x, true);
+    }
+  }
+  /* A number that counts up once when it enters. Final text is already in place. */
+  function cnt(value, kind, cls) {
+    const n = h('span', { class: cls || null, 'data-count': '' });
+    n.dataset.fmt = kind;
+    if (isNum(value)) n.dataset.value = String(value);
+    n.textContent = isNum(value) ? fmtCount(kind, value) : 'TBD';
+    return n;
+  }
+  function cntRange(lo, hi, cls) {
+    const n = h('span', { class: cls || null, 'data-count': '' });
+    n.dataset.fmt = 'range';
+    if (isNum(lo) && isNum(hi)) { n.dataset.lo = String(lo); n.dataset.hi = String(hi); }
+    n.textContent = isNum(lo) && isNum(hi) ? `${num(lo, 0)}-${num(hi, 0)}` : 'TBD';
+    return n;
+  }
+  function countUp(n) {
+    const kind = n.dataset.fmt;
+    const t0 = performance.now();
+    const dur = 900;
+    const set = (e) => {
+      if (kind === 'range') {
+        n.textContent = `${num(parseFloat(n.dataset.lo) * e, 0)}-${num(parseFloat(n.dataset.hi) * e, 0)}`;
+      } else {
+        const t = parseFloat(n.dataset.value);
+        n.textContent = fmtCount(kind, t * e);
+      }
+    };
+    if (kind === 'range' ? !n.dataset.lo : !isNum(parseFloat(n.dataset.value))) return;
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      set(1 - Math.pow(1 - k, 3));
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  function setupCounts() {
+    if (reduce || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        io.unobserve(e.target);
+        countUp(e.target);
+      });
+    }, { threshold: 0.2, rootMargin: '0px 0px -8% 0px' });
+    $$('[data-count]').forEach((el) => io.observe(el));
   }
 
   /* ---------- data ---------- */
@@ -74,19 +144,29 @@
     const b = d.budget || {};
     const p = d.prebuilt || {};
     const best = p.best_match || {};
-    const specs = Object.fromEntries((c.specs || []).map(([k, v]) => [k, v]));
-    const dateIn = (s) => (typeof s === 'string' && (s.match(/\d{4}-\d{2}-\d{2}/) || [])[0]) || null;
+    const sh = d.shop || {};
+    const specs = Object.fromEntries((c.specs || []).map(([k, x]) => [k, x]));
+    const dateIn = (t) => (typeof t === 'string' && (t.match(/\d{4}-\d{2}-\d{2}/) || [])[0]) || null;
     const recDate = c.date || rec.date || dateIn(rec.notes) || 'TBD';
     const preTotal = best.price;
+    const stages = rec.stages || [];
+    const pens = ((c.supplies || {}).items || [])[0];
+    const s1 = stages[0] && stages[0][2];
+    const m = /\$\d[\d,]*/.exec(c.risk_first || '');
     const v = {
       content: c,
+      shop: sh,
       specs,
+      stages,
       recTotal: rec.total,
       recDate,
       cheapTotal: b.total,
       cheapDate: txt(b.date),
       preTotal,
       preDate: txt(p.date),
+      zero: 0,
+      firstOrder: isNum(s1) && pens && isNum(pens[1]) ? Math.round(s1 + pens[1]) : null,
+      slideCost: m ? m[0] : 'TBD',
       saveRec: isNum(preTotal) && isNum(rec.total) ? preTotal - rec.total : null,
       saveCheap: isNum(preTotal) && isNum(b.total) ? preTotal - b.total : null,
     };
@@ -109,26 +189,160 @@
     });
     $$('[data-count]').forEach((n) => {
       const x = v[n.dataset.count];
-      n.dataset.value = isNum(x) ? String(x) : '';
-      n.textContent = usd(x, n.hasAttribute('data-round'));
+      if (isNum(x)) n.dataset.value = String(x);
+      n.dataset.fmt = n.dataset.fmt || 'usd0';
+      n.textContent = isNum(x) ? fmtCount(n.dataset.fmt, x) : 'TBD';
       if (!isNum(x)) n.classList.add('tbd');
     });
   }
 
-  function renderStages(v) {
-    const ol = $('#stages');
-    const stages = (v.content.recommended || {}).stages || [];
-    let run = 0;
-    stages.forEach(([no, name, amt, note]) => {
-      if (isNum(amt)) run += amt;
-      ol.append(h('li', { title: note || null },
-        h('span', { class: 'st-no' }, `Stage ${no}`),
-        h('span', { class: 'st-name' }, name),
-        h('span', { class: 'st-amt' }, usd(amt)),
-        h('span', { class: 'st-run' }, `running ${usd(run, true)}`)));
+  /* A: general notes */
+  function renderNotes(v) {
+    const sh = v.shop;
+    const pr = sh.printed || {};
+    const items = [
+      ['What it is:', ' a flatbed pen plotter for white-on-blue prints and drafting film, up to 36 x 48 in, built in the shop.'],
+      ['What it costs:', ` ${usd(v.recTotal)} in materials for the recommended build, before shipping and tax.`],
+      ['How the money goes out:', ` ${word(v.stages.length)} orders, smallest first. The first is ${isNum(v.firstOrder) ? usd(v.firstOrder, true) : 'TBD'} and proves the design before any metal is cut.`],
+      ['What is already done:', ' the design, every Haas program, the drawings, the wiring, the firmware settings and the plotting software. Nothing has been bought.'],
+      ['What it needs from the shop:', ` about ${num(sh.total_cycle_hours)} h of spindle time plus ${num(sh.setup_hours_estimate)} h of setup on the Haas, ${num(pr.grams_est, 0)} g of printer filament, and Noah's assembly time.`],
+    ];
+    const tb = $('#notes tbody');
+    items.forEach(([k, t], i) => tb.append(h('tr', null, h('td', { class: 'n' }, String(i + 1)), h('td', null, h('b', null, k), t))));
+  }
+
+  /* B: stage staircase */
+  const stair = { items: [], total: 0, idx: 0, pinned: false, w: 0 };
+
+  function setStairActive(i) {
+    stair.idx = i;
+    const it = stair.items[i];
+    if (!it) return;
+    $('#sp-no').textContent = `Stage ${it.no}`;
+    $('#sp-name').textContent = it.name;
+    const c = $('#sp-cost');
+    c.textContent = usd(it.amt);
+    c.append(h('small', null, 'this stage'));
+    $('#sp-run').textContent = `Running total ${usd(it.to)}`;
+    $('#sp-desc').textContent = it.note || '';
+    $$('#stair-svg .st').forEach((g, k) => {
+      g.classList.toggle('next', stair.pinned && k > i);
+      g.classList.toggle('active', stair.pinned && k === i);
     });
   }
 
+  function wrapWords(t, max) {
+    const out = [];
+    let cur = '';
+    String(t).split(/\s+/).forEach((w) => {
+      if (cur && (cur + ' ' + w).length > max) { out.push(cur); cur = w; } else cur = cur ? cur + ' ' + w : w;
+    });
+    if (cur) out.push(cur);
+    return out;
+  }
+
+  function drawStair() {
+    const box = $('#stair-svg');
+    const items = stair.items;
+    if (!box || !items.length) return;
+    const W = Math.max(280, Math.round(box.clientWidth || 800));
+    stair.w = W;
+    const n = items.length;
+    const full = W >= 760;
+    const ml = full ? 68 : 54, mr = 8, mt = full ? 104 : 62, ph = full ? 330 : 250, mb = 30;
+    const slot = (W - ml - mr) / n;
+    const gap = full ? 18 : 6;
+    const bw = slot - gap;
+    const H = mt + ph + mb;
+    const max = stair.total;
+    const y = (x) => mt + ph - (x / max) * ph;
+    const svg = s('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, 'aria-hidden': 'true' });
+
+    for (let g = 0; g <= max; g += 500) {
+      svg.append(s('line', { class: 'grid-l', x1: ml, x2: W - mr, y1: y(g), y2: y(g) }));
+      svg.append(s('text', { class: 't-dim', x: ml - 8, y: y(g) + 4, 'text-anchor': 'end', 'font-size': 11 }, usd(g, true)));
+    }
+    svg.append(s('line', { class: 'grid-l grid-top', x1: ml, x2: W - mr, y1: y(max), y2: y(max) }));
+    svg.append(s('text', { class: 't-mark', x: ml + 4, y: y(max) - 7, 'font-size': 11 }, `TOTAL ${usd(max)}`));
+    svg.append(s('line', { x1: ml, x2: ml, y1: mt, y2: mt + ph, stroke: 'var(--dim)', 'stroke-width': 1 }));
+    svg.append(s('line', { x1: ml, x2: W - mr, y1: mt + ph, y2: mt + ph, stroke: 'var(--line)', 'stroke-width': 1 }));
+
+    const maxChars = Math.max(8, Math.floor(bw / 6.6));
+    let firstLabelTop = 0;
+    items.forEach((it, k) => {
+      const x0 = ml + k * slot + gap / 2;
+      const yt = y(it.to), yb = y(it.from);
+      const g = s('g', { class: `st${k === 0 ? ' first' : ''}` });
+      g.append(s('rect', { class: 'blk', x: x0, y: yt, width: bw, height: Math.max(1, yb - yt) }));
+      const cx = x0 + bw / 2;
+      const lines = full
+        ? [['t-dim', `STAGE ${it.no}`, 10], ...wrapWords(it.name, maxChars).map((t) => ['t-name', t, 12]), ['t-dim', `+${usd(it.amt)}`, 11], ['', usd(it.to), 11]]
+        : [['t-mark', it.no, 12], ['', usd(it.to, true), 11]];
+      lines.forEach(([cls, t, fs], i) => {
+        g.append(s('text', { class: cls, x: cx, y: yt - 8 - (lines.length - 1 - i) * (full ? 14 : 14), 'text-anchor': 'middle', 'font-size': fs }, t));
+      });
+      if (k === 0) firstLabelTop = yt - 8 - (lines.length - 1) * 14 - 11;
+      svg.append(g);
+      svg.append(s('text', { class: 't-dim', x: cx, y: mt + ph + 19, 'text-anchor': 'middle', 'font-size': 11 }, it.no));
+      if (k < n - 1) svg.append(s('line', { class: 'tread', x1: x0 + bw, x2: x0 + slot, y1: yt, y2: yt }));
+    });
+    const tx = ml + gap / 2;
+    const ty = firstLabelTop - 30;
+    const tag = s('g', null,
+      s('line', { x1: tx + 8, x2: tx + 8, y1: ty + 16, y2: firstLabelTop - 2, stroke: 'var(--mark)', 'stroke-width': 1 }),
+      s('rect', { class: 'tag-bg', x: tx, y: ty, width: 70, height: 16 }),
+      s('text', { class: 'tag-t', x: tx + 35, y: ty + 12, 'text-anchor': 'middle', 'font-size': 10 }, 'ORDER NOW'));
+    svg.append(tag);
+    box.replaceChildren(svg);
+    setStairActive(stair.idx);
+  }
+
+  function renderStairs(v) {
+    let run = 0;
+    stair.items = v.stages.map(([no, name, amt, note]) => {
+      const from = run;
+      run += isNum(amt) ? amt : 0;
+      return { no, name, amt, note, from, to: run };
+    });
+    stair.total = run;
+    if (!stair.items.length) return;
+    const ol = $('#stair-list');
+    stair.items.forEach((it) => ol.append(h('li', null,
+      h('span', { class: 'sl-no' }, `STAGE ${it.no}`),
+      h('span', { class: 'sl-name' }, it.name),
+      h('span', { class: 'sl-amt' }, usd(it.amt)),
+      h('span', { class: 'sl-desc' }, it.note || ''),
+      h('span', { class: 'sl-run' }, `Running total ${usd(it.to)}`))));
+    drawStair();
+    if ('ResizeObserver' in window) {
+      let t = null;
+      new ResizeObserver(() => {
+        const w = Math.round($('#stair-svg').clientWidth || 0);
+        if (Math.abs(w - stair.w) < 2) return;
+        clearTimeout(t);
+        t = setTimeout(() => { drawStair(); if (hasGsap()) window.ScrollTrigger.refresh(); }, 80);
+      }).observe($('#stair-svg'));
+    }
+  }
+
+  /* C: done tiles */
+  function renderDone(v) {
+    const sh = v.shop;
+    const progs = sh.programs || [];
+    const pr = sh.printed || {};
+    const printedQty = Array.isArray(pr.parts) ? pr.parts.reduce((a, x) => a + (isNum(x.qty) ? x.qty : 0), 0) : null;
+    const machined = (v.content.shop_parts || {}).machined_parts;
+    const tile = (node, label) => h('div', { class: 'dtile' }, h('dd', null, node), h('dt', null, label));
+    const dl = $('#done-tiles');
+    dl.append(
+      tile(cnt(progs.length, 'int', 'big num'), 'Haas programs, verified and backplotted'),
+      tile(cnt(machined, 'int', 'big num'), 'machined parts'),
+      tile(cnt(printedQty, 'int', 'big num'), `printed parts, ${num(pr.grams_est, 0)} g PETG`),
+      tile(cnt(0, 'int', 'big num'), 'hole-alignment fit failures'),
+      tile(cnt(0, 'int', 'big num'), 'collisions at all 4 travel corners, pen up and down'));
+  }
+
+  /* E: cards */
   function rows(target, list) {
     const dl = $(target);
     list.forEach(([label, content]) => {
@@ -137,9 +351,21 @@
       if (Array.isArray(content)) {
         const items = content.filter(has);
         if (!items.length) return;
-        dd = h('dd', null, h('ul', null, items.map((x) => h('li', null, val(x)))));
+        const ul = h('ul', null, items.map((x) => h('li', null, val(x))));
+        dd = h('dd', null, items.length > 1
+          ? h('details', { class: 'inline' }, h('summary', null, `${items.length} ${label.toLowerCase()}`), ul)
+          : ul);
       } else if (content instanceof Node) {
         dd = h('dd', null, content);
+      } else if (typeof content === 'string' && content.length > 220) {
+        /* Long text: first sentence stays visible, the rest folds away so the three cards stay comparable. */
+        const cut = content.search(/\.\s/);
+        if (cut > 0 && cut < content.length - 2) {
+          dd = h('dd', null, h('p', null, content.slice(0, cut + 1)),
+            h('details', { class: 'inline' }, h('summary', null, 'More'), h('p', null, content.slice(cut + 2))));
+        } else {
+          dd = h('dd', null, val(content));
+        }
       } else {
         dd = h('dd', null, val(content));
       }
@@ -153,6 +379,8 @@
     const b = d.budget || {};
     const rec = (v.content.recommended || {});
     const best = (d.prebuilt || {}).best_match || {};
+
+    $('#cost-intro').textContent = `Buying a machine that takes a 36 x 48 sheet and these pens starts at ${usd(best.price, true)}. Building the cheapest possible version costs less but gives up accuracy and needs a redesign.`;
 
     rows('#rows-cheap', [
       ['What you get', b.summary],
@@ -227,24 +455,22 @@
 
     const axis = h('div', { class: 'scale-axis', 'aria-hidden': 'true' });
     for (let t = 0; t <= top + 1e-6; t += step) {
-      const s = h('span', null, t === 0 ? '$0' : `$${(t / 1000).toLocaleString('en-US', { maximumFractionDigits: 1 })}k`);
-      s.style.left = `${(t / top) * 100}%`;
-      axis.append(s);
+      const sp = h('span', null, t === 0 ? '$0' : `$${(t / 1000).toLocaleString('en-US', { maximumFractionDigits: 1 })}k`);
+      sp.style.left = `${(t / top) * 100}%`;
+      axis.append(sp);
     }
     box.after(h('div', { class: 'scale' }, h('span'), axis, h('span')));
 
     const sav = $('#savings');
     [
-      ['Recommended build vs buying', v.saveRec, v.recDate],
-      ['Cheapest build vs buying', v.saveCheap, v.cheapDate],
-    ].forEach(([label, amt, d1]) => {
+      ['Recommended build vs buying', v.saveRec],
+      ['Cheapest build vs buying', v.saveCheap],
+    ].forEach(([label, amt]) => {
       const pos = isNum(amt) && amt >= 0;
       sav.append(h('div', { class: `save${isNum(amt) && !pos ? ' neg' : ''}` },
         h('span', { class: 'save-txt' }, label),
         h('span', { class: 'save-amt money' }, isNum(amt) ? usd(Math.abs(amt), true) : 'TBD'),
-        h('span', { class: 'save-sub' }, isNum(amt)
-          ? `${pos ? 'less' : 'more'} on parts; prices read ${d1 === v.preDate ? d1 : `${d1} and ${v.preDate}`}; shop time not counted`
-          : 'waiting on prices')));
+        h('span', { class: 'save-sub' }, isNum(amt) ? 'on materials; shop time is section F' : 'waiting on prices')));
     });
   }
 
@@ -274,26 +500,25 @@
     $('#others-wrap').hidden = false;
   }
 
+  /* F: shop time, and the G program table */
   function renderShop(d) {
-    const s = d.shop || {};
-    const progs = s.programs || [];
-    const lab = s.labour_hours_estimate || {};
-    const pr = s.printed || {};
-    const cyc = s.total_cycle_hours;
-    const set = s.setup_hours_estimate;
+    const sh = d.shop || {};
+    const progs = sh.programs || [];
+    const lab = sh.labour_hours_estimate || {};
+    const pr = sh.printed || {};
+    const cyc = sh.total_cycle_hours;
+    const set = sh.setup_hours_estimate;
     const lo = [cyc, set, lab.low].every(isNum) ? cyc + set + lab.low : null;
     const hi = [cyc, set, lab.high].every(isNum) ? cyc + set + lab.high : null;
 
     const tile = (label, big, unit, sub, cls) => h('div', { class: `tile${cls ? ' ' + cls : ''}` },
       h('dt', null, label),
-      h('dd', null, h('span', { class: 'big num' }, big), unit ? h('span', { class: 'unit' }, unit) : null,
-        h('span', { class: 'sub' }, sub)));
-    const range = (a, b) => (isNum(a) && isNum(b) ? `${num(a, 0)}-${num(b, 0)}` : 'TBD');
+      h('dd', null, big, unit ? h('span', { class: 'unit' }, unit) : null, h('span', { class: 'sub' }, sub)));
     $('#shop-tiles').append(
-      tile('Mill spindle time', num(cyc), 'h', `${progs.length} programs, all quantities; estimate`),
-      tile('Setups and blank prep', num(set), 'h', 'estimate'),
-      tile('Assembly, wiring, setup', range(lab.low, lab.high), 'h', 'rough estimate, not measured'),
-      tile('Total shop time', range(lo, hi), 'h', 'estimate; sum of the three', 'total'),
+      tile('Mill spindle time', cnt(cyc, 'dec1', 'big num'), 'h', `${progs.length} programs, all quantities; estimate`),
+      tile('Setups and blank prep', cnt(set, 'dec1', 'big num'), 'h', 'estimate'),
+      tile('Assembly, wiring, setup', cntRange(lab.low, lab.high, 'big num'), 'h', 'rough estimate, not measured'),
+      tile('Total shop time', cntRange(lo, hi, 'big num'), 'h', 'estimate; sum of the three', 'total'),
     );
 
     const ul = $('#printed');
@@ -307,11 +532,10 @@
     ul.append(h('li', null, h('span', null, 'Filament, estimate'), h('span', null, isNum(pr.grams_est) ? `${num(pr.grams_est, 0)} g` : 'TBD')));
 
     const as = $('#shop-assume');
-    [...(s.assumptions || []), ...(pr.assumptions || []).map((x) => `Printed parts: ${x}`),
+    [...(sh.assumptions || []), ...(pr.assumptions || []).map((x) => `Printed parts: ${x}`),
       has(lab.basis) ? `Assembly hours: ${lab.basis}` : null]
       .filter(has).forEach((x) => as.append(h('li', null, val(x))));
 
-    /* program table */
     const t = $('#programs');
     t.append(h('thead', null, h('tr', null,
       h('th', { scope: 'col' }, 'Program'), h('th', { scope: 'col' }, 'Part'),
@@ -344,6 +568,7 @@
     if (totalLabel) t.append(h('tfoot', null, h('tr', null, h('th', { scope: 'row' }, totalLabel), h('td', { class: 'r m' }, usd(total)))));
   }
 
+  /* G: parts sheet */
   function renderSheet(d, v) {
     const rec = v.content.recommended || {};
     const t = $('#stage-table');
@@ -370,7 +595,6 @@
     const supTotal = supItems.reduce((a, [, x]) => a + (isNum(x) ? x : 0), 0);
     moneyTable('#supplies-table', ['Item', `Price, ${sup.date || v.recDate}`], supItems, supTotal, 'Supplies total');
 
-    /* cheapest build */
     const b = d.budget || {};
     moneyTable('#cheap-groups', ['Group', `Subtotal, ${v.cheapDate}`],
       (b.groups || []).map(([n, a]) => [n, a]), b.total, 'Cheapest build total');
@@ -407,16 +631,27 @@
     t.append(tb);
   }
 
+  /* H: checks with drawn ticks */
   function renderChecks(v) {
     const ul = $('#checklist');
-    (v.content.checks || []).forEach((c) => ul.append(h('li', null, c)));
+    (v.content.checks || []).forEach((c) => {
+      const ck = s('svg', { class: 'ck', viewBox: '0 0 20 20', 'aria-hidden': 'true' }, s('path', { d: 'M3 10.5 L8 15.5 L17 5', pathLength: 1 }));
+      ul.append(h('li', null, ck, c));
+    });
+  }
+
+  /* J: sign-off */
+  function renderSign(v) {
+    const a = $('#sb-amount');
+    a.replaceChildren(cnt(v.firstOrder, 'usd0'));
+    $('#sb-then').textContent = `${word(Math.max(0, v.stages.length - 1))} more stages, each approved on its own, ${usd(v.recTotal)} total`;
   }
 
   /* ---------- images that are not there yet ---------- */
   function guardImages() {
-    $$('.view-body img').forEach((img) => {
+    $$('img[src^="assets/"]').forEach((img) => {
       const swap = () => {
-        const box = h('div', { class: 'img-missing', role: 'img', 'aria-label': img.alt }, `Image pending: ${img.getAttribute('src')}`);
+        const box = h('div', { class: 'img-missing', role: 'img', 'aria-label': img.alt || 'image' }, `Image pending: ${img.getAttribute('src')}`);
         img.replaceWith(box);
       };
       if (img.complete && img.naturalWidth === 0 && img.src) swap();
@@ -424,50 +659,14 @@
     });
   }
 
-  /* ---------- motion ---------- */
-  const below = (el) => el.getBoundingClientRect().top > window.innerHeight * 0.92;
+  /* ---------- the hero drawing: plotted by a pen, scrubbed by scroll ---------- */
+  const hero = { draw: null, p0: 0, autoP: 0, scrubP: 0, ready: false };
+  const applyHero = () => { if (hero.draw) hero.draw(Math.max(hero.autoP, hero.scrubP)); };
+  let heroSvg = null;
+  const PART_W = 200, PART_H = 175;
 
-  function countUp(n) {
-    const target = parseFloat(n.dataset.value);
-    if (!isNum(target)) return;
-    const round = n.hasAttribute('data-round');
-    const t0 = performance.now();
-    const dur = 900;
-    const step = (t) => {
-      const k = Math.min(1, (t - t0) / dur);
-      const e = 1 - Math.pow(1 - k, 3);
-      n.textContent = usd(k < 1 ? target * e : target, round || k < 1);
-      if (k < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }
-
-  function setupMotion() {
-    if (reduce || !('IntersectionObserver' in window)) return;
-
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (!e.isIntersecting) return;
-        const el = e.target;
-        io.unobserve(el);
-        if (el.classList.contains('rise')) { el.classList.remove('rise'); el.classList.add('rise-done'); }
-        if (el.classList.contains('pre')) el.classList.remove('pre');
-        if (el.classList.contains('bar-fill')) el.style.transform = 'scaleX(1)';
-        if (el.dataset && el.dataset.count !== undefined && !el.dataset.counted) { el.dataset.counted = '1'; countUp(el); }
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
-
-    $$('.sec .wrap > *').forEach((el) => { if (below(el)) { el.classList.add('rise'); io.observe(el); } });
-    $$('.sec-head').forEach((el) => { if (below(el)) { el.classList.add('pre'); io.observe(el); } });
-    $$('.bar-fill').forEach((el) => {
-      if (!el.closest('.na')) { el.style.transform = 'scaleX(.06)'; io.observe(el); }
-    });
-    $$('[data-count]').forEach((el) => io.observe(el));
-  }
-
-  /* ---------- the hero drawing: plot it like the pen would ---------- */
   async function plotHero() {
-    if (reduce) return; // the <img> already shows the finished drawing
+    if (reduce) return; // the <img> already shows the finished drawing; the readout already says PLOT COMPLETE
     const box = $('#plot');
     const img = box && box.querySelector('img');
     if (!img) return;
@@ -478,25 +677,25 @@
       src = await r.text();
     } catch (e) { return; }
     const doc = new DOMParser().parseFromString(src, 'image/svg+xml');
-    const root = doc.documentElement;
-    if (!root || root.nodeName.toLowerCase() !== 'svg' || doc.querySelector('parsererror')) return;
-    root.querySelectorAll('script, foreignObject, a').forEach((n) => n.remove());
-    [root, ...root.querySelectorAll('*')].forEach((n) => [...n.attributes].forEach((a) => {
+    const rootEl = doc.documentElement;
+    if (!rootEl || rootEl.nodeName.toLowerCase() !== 'svg' || doc.querySelector('parsererror')) return;
+    rootEl.querySelectorAll('script, foreignObject, a').forEach((n) => n.remove());
+    [rootEl, ...rootEl.querySelectorAll('*')].forEach((n) => [...n.attributes].forEach((a) => {
       if (/^on/i.test(a.name) || /href$/i.test(a.name)) n.removeAttribute(a.name);
     }));
-    const svg = document.importNode(root, true);
+    const svg = document.importNode(rootEl, true);
     svg.removeAttribute('width');
     svg.removeAttribute('height');
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', img.alt);
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     img.replaceWith(svg);
+    heroSvg = svg;
 
     const vb = svg.viewBox.baseVal;
     const unit = vb && vb.width ? vb.width : 200;
     const shapes = $$('path, circle, ellipse, line, polyline, polygon, rect', svg);
     const texts = $$('text', svg);
-    /* Map a shape's own coordinates into the root user space through any group transforms. */
     const toRoot = (el) => {
       let m = null;
       for (let n = el; n && n !== svg; n = n.parentNode) {
@@ -508,30 +707,26 @@
     };
 
     const segs = [];
-    shapes.forEach((s) => {
-      s.removeAttribute('pathLength');
+    shapes.forEach((sh) => {
+      sh.removeAttribute('pathLength');
       let len = 0;
-      try { len = s.getTotalLength(); } catch (e) { len = 0; }
+      try { len = sh.getTotalLength(); } catch (e) { len = 0; }
       if (!(len > 0)) return;
       let m = null;
-      try { m = toRoot(s); } catch (e) { m = null; }
-      const filled = getComputedStyle(s).fill !== 'none';
-      s.style.strokeDasharray = `${len} ${len}`;
-      s.style.strokeDashoffset = String(len);
-      if (filled) s.style.fillOpacity = '0';
-      segs.push({ s, len, m, filled });
+      try { m = toRoot(sh); } catch (e) { m = null; }
+      const filled = getComputedStyle(sh).fill !== 'none';
+      sh.style.strokeDasharray = `${len} ${len}`;
+      sh.style.strokeDashoffset = String(len);
+      if (filled) sh.style.fillOpacity = '0';
+      segs.push({ s: sh, len, m, filled, k: 0 });
     });
-    texts.forEach((t) => { t.style.opacity = '0'; t.style.transition = 'opacity .6s ease'; });
+    texts.forEach((t) => { t.style.opacity = '0'; });
     if (!segs.length) { texts.forEach((t) => { t.style.opacity = ''; }); return; }
 
-    const ns = 'http://www.w3.org/2000/svg';
-    const pen = document.createElementNS(ns, 'g');
-    pen.setAttribute('class', 'pen');
+    const pen = s('g', { class: 'pen' });
     const r = unit * 0.016;
-    const ring = document.createElementNS(ns, 'circle');
-    ring.setAttribute('r', String(r));
-    const cross = document.createElementNS(ns, 'path');
-    cross.setAttribute('d', `M${-r * 2.2},0 H${-r * 1.2} M${r * 1.2},0 H${r * 2.2} M0,${-r * 2.2} V${-r * 1.2} M0,${r * 1.2} V${r * 2.2}`);
+    const ring = s('circle', { r });
+    const cross = s('path', { d: `M${-r * 2.2},0 H${-r * 1.2} M${r * 1.2},0 H${r * 2.2} M0,${-r * 2.2} V${-r * 1.2} M0,${r * 1.2} V${r * 2.2}` });
     pen.setAttribute('stroke-width', String(unit * 0.004));
     pen.append(ring, cross);
     svg.append(pen);
@@ -542,77 +737,357 @@
       return p;
     };
     const total = segs.reduce((a, g) => a + g.len, 0);
-    const drawSpeed = total / 3.6;      // whole drawing in about 3.6 s of pen-down time
-    const travelSpeed = drawSpeed * 4;  // pen-up moves are quicker
+    const drawSpeed = total / 3.6;
+    const travelSpeed = drawSpeed * 4;
     const plan = [];
     let prevEnd = null;
+    let t = 0;
     segs.forEach((g) => {
       const start = pt(g, 0);
       if (prevEnd) {
         const dist = Math.hypot(start.x - prevEnd.x, start.y - prevEnd.y);
-        plan.push({ kind: 'up', from: prevEnd, to: start, dur: Math.min(0.35, Math.max(0.04, dist / travelSpeed)) });
+        const dur = Math.min(0.35, Math.max(0.04, dist / travelSpeed));
+        plan.push({ kind: 'up', from: prevEnd, to: start, t0: t, t1: t + dur });
+        t += dur;
       }
-      plan.push({ kind: 'down', g, dur: Math.max(0.06, g.len / drawSpeed) });
+      const dur = Math.max(0.06, g.len / drawSpeed);
+      plan.push({ kind: 'down', g, t0: t, t1: t + dur });
+      t += dur;
       prevEnd = pt(g, g.len);
     });
+    const Tt = t;
+    hero.p0 = plan.find((st) => st.kind === 'down').t1 / Tt;
 
-    const status = $('#pen-status');
-    const setPen = (p, down) => {
+    const dro = $('#dro');
+    const f1 = (x) => clamp(x, 0, 999.9).toFixed(1).padStart(5, '0');
+    const setPen = (p, down, done) => {
       pen.setAttribute('transform', `translate(${p.x} ${p.y})`);
       ring.style.fillOpacity = down ? '1' : '0';
+      pen.style.opacity = done ? '0' : '1';
+      if (!dro) return;
+      if (done) { dro.textContent = 'PLOT COMPLETE'; return; }
+      const mmX = clamp(p.x, 0, PART_W);
+      const mmY = clamp(PART_H - p.y, 0, PART_H);
+      dro.textContent = `X ${f1(mmX)}  Y ${f1(mmY)}  ${down ? 'PEN DN' : 'PEN UP'}`;
     };
-    let i = 0;
-    let tStart = null;
-    let done = 0;
-    const finish = () => {
-      segs.forEach((g) => { g.s.style.strokeDashoffset = '0'; g.s.style.strokeDasharray = ''; if (g.filled) { g.s.style.transition = 'fill-opacity .6s ease'; g.s.style.fillOpacity = ''; } });
-      texts.forEach((t) => { t.style.opacity = ''; });
-      pen.style.transition = 'opacity .5s ease';
-      pen.style.opacity = '0';
-      if (status) status.textContent = 'PLOTTED';
-    };
-    const tick = (now) => {
-      if (tStart === null) tStart = now;
-      let t = (now - tStart) / 1000;
-      while (i < plan.length && t >= plan[i].dur) {
-        const step = plan[i];
-        if (step.kind === 'down') { step.g.s.style.strokeDashoffset = '0'; done += step.g.len; }
-        t -= step.dur;
-        tStart += step.dur * 1000;
-        i++;
-      }
-      if (i >= plan.length) { finish(); return; }
-      const step = plan[i];
-      const k = t / step.dur;
-      let part = 0;
-      if (step.kind === 'down') {
-        const at = step.g.len * k;
-        part = at;
-        step.g.s.style.strokeDashoffset = String(step.g.len - at);
-        setPen(pt(step.g, at), true);
-      } else {
+
+    hero.draw = (p) => {
+      const T = clamp(p, 0, 1) * Tt;
+      let cur = null;
+      plan.forEach((st) => {
+        if (st.kind === 'down') {
+          const k = T <= st.t0 ? 0 : T >= st.t1 ? 1 : (T - st.t0) / (st.t1 - st.t0);
+          if (k !== st.g.k) {
+            const g = st.g;
+            const was = g.k;
+            g.k = k;
+            if (k >= 1) { g.s.style.strokeDasharray = 'none'; g.s.style.strokeDashoffset = '0'; if (g.filled) g.s.style.fillOpacity = ''; }
+            else {
+              if (was >= 1) g.s.style.strokeDasharray = `${g.len} ${g.len}`;
+              g.s.style.strokeDashoffset = String(g.len * (1 - k));
+              if (g.filled) g.s.style.fillOpacity = '0';
+            }
+          }
+        }
+        if (T >= st.t0 && T < st.t1) cur = st;
+      });
+      const done = p >= 1;
+      texts.forEach((x) => { x.style.opacity = p >= 0.985 ? '1' : '0'; });
+      if (done) { setPen(pt(segs[segs.length - 1], segs[segs.length - 1].len), false, true); return; }
+      if (!cur) { setPen(pt(segs[0], 0), false, false); return; }
+      const k = (T - cur.t0) / (cur.t1 - cur.t0);
+      if (cur.kind === 'down') setPen(pt(cur.g, cur.g.len * k), true, false);
+      else {
         const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-        setPen({ x: step.from.x + (step.to.x - step.from.x) * e, y: step.from.y + (step.to.y - step.from.y) * e }, false);
+        setPen({ x: cur.from.x + (cur.to.x - cur.from.x) * e, y: cur.from.y + (cur.to.y - cur.from.y) * e }, false, false);
       }
-      if (status) status.textContent = `PLOTTING ${Math.floor(((done + part) / total) * 100)}%`;
-      requestAnimationFrame(tick);
     };
-    setPen(pt(segs[0], 0), false);
-    // Small pause so the reader sees the pen land before it moves.
-    setTimeout(() => requestAnimationFrame(tick), 450);
+    hero.ready = true;
+    hero.draw(0);
+
+    const deskPin = hasGsap() && mq('(min-width: 900px) and (prefers-reduced-motion: no-preference)').matches;
+    const target = deskPin ? hero.p0 : 1;
+    const dur = deskPin ? 1200 : 3000;
+    setTimeout(() => {
+      const t0 = performance.now();
+      const f = (now) => {
+        const k = Math.min(1, (now - t0) / dur);
+        hero.autoP = target * k;
+        applyHero();
+        if (k < 1) requestAnimationFrame(f);
+      };
+      requestAnimationFrame(f);
+    }, 250);
+  }
+
+  /* crosshair cursor over the hero drawing, fine pointers only */
+  function setupCrosshair() {
+    const frame = $('#sheet-frame');
+    const xh = $('#xhair');
+    const lab = $('#xhair-l');
+    if (!frame || !xh || !mq('(hover: hover) and (pointer: fine)').matches) return;
+    frame.addEventListener('pointerenter', () => frame.classList.add('xh-on'));
+    frame.addEventListener('pointerleave', () => frame.classList.remove('xh-on'));
+    frame.addEventListener('pointermove', (e) => {
+      const r = frame.getBoundingClientRect();
+      xh.style.transform = `translate(${e.clientX - r.left}px, ${e.clientY - r.top}px)`;
+      let mx, my;
+      const plot = $('#plot').getBoundingClientRect();
+      if (heroSvg && heroSvg.getScreenCTM) {
+        const p = heroSvg.createSVGPoint();
+        p.x = e.clientX; p.y = e.clientY;
+        const q = p.matrixTransform(heroSvg.getScreenCTM().inverse());
+        mx = q.x; my = PART_H - q.y;
+      } else {
+        mx = ((e.clientX - plot.left) / plot.width) * 234 - 10;
+        my = PART_H - (((e.clientY - plot.top) / plot.height) * 205 - 10);
+      }
+      lab.textContent = `X ${clamp(mx, 0, PART_W).toFixed(1)}  Y ${clamp(my, 0, PART_H).toFixed(1)}`;
+    });
+  }
+
+  /* ---------- pen up / pen down pairs ---------- */
+  function setPair(pair, up) {
+    pair.style.setProperty('--up', String(up));
+    $$('[data-pen]', pair).forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.pen === 'up') === (up > 0.5))));
+  }
+  function setupPairs() {
+    $$('.pair').forEach((pair) => {
+      $$('[data-pen]', pair).forEach((b) => b.addEventListener('click', () => setPair(pair, b.dataset.pen === 'up' ? 1 : 0)));
+    });
+  }
+
+  /* ---------- scroll layer: progress line, nav, grid parallax, machine tour ---------- */
+  const scrollState = { gridK: 0, tour: false };
+  function setupScroll() {
+    const fill = $('#db-fill');
+    const read = $('#db-read');
+    const toc = $('#toc');
+    const links = $$('#toc-list a').map((a) => ({
+      a, z: a.dataset.z, el: $(a.getAttribute('href')), label: a.childNodes[1] ? a.childNodes[1].textContent.trim() : '',
+    })).filter((l) => l.el);
+    const cur = $('#toc-cur');
+    const btn = $('#toc-btn');
+    const sum = $('#sum');
+    const fine = $('#bg-fine');
+    const coarse = $('#bg-coarse');
+    let ticking = false;
+    let lastActive = null;
+
+    const update = () => {
+      ticking = false;
+      const y = window.scrollY || 0;
+      const vh = window.innerHeight;
+      const max = Math.max(1, root.scrollHeight - vh);
+      const pct = clamp(y / max, 0, 1);
+      if (fill) fill.style.transform = `scaleX(${pct})`;
+      if (read) read.textContent = `Y ${(pct * 100).toFixed(1)}%`;
+
+      if (toc && sum) {
+        const show = sum.getBoundingClientRect().top < vh * 0.7;
+        toc.classList.toggle('show', show);
+        let active = null;
+        links.forEach((l) => { if (l.el.getBoundingClientRect().top <= vh * 0.4) active = l; });
+        if (active !== lastActive) {
+          lastActive = active;
+          links.forEach((l) => { l.a.classList.toggle('on', l === active); if (l === active) l.a.setAttribute('aria-current', 'location'); else l.a.removeAttribute('aria-current'); });
+          if (active && cur) cur.replaceChildren(h('b', null, active.z), ` ${active.label}`);
+        }
+      }
+
+      if (scrollState.gridK) {
+        if (fine) fine.style.transform = `translate3d(0, ${-((y * 0.15 * scrollState.gridK) % 24)}px, 0)`;
+        if (coarse) coarse.style.transform = `translate3d(0, ${-((y * 0.3 * scrollState.gridK) % 120)}px, 0)`;
+      }
+      if (scrollState.tour) updateTour(vh);
+    };
+    const req = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    window.addEventListener('scroll', req, { passive: true });
+    window.addEventListener('resize', req);
+    scrollState.update = update;
+
+    const setGrid = () => {
+      scrollState.gridK = mq('(prefers-reduced-motion: reduce)').matches ? 0 : mq('(min-width: 900px)').matches ? 1 : 0.5;
+      if (!scrollState.gridK) { if (fine) fine.style.transform = ''; if (coarse) coarse.style.transform = ''; }
+      req();
+    };
+    [mq('(prefers-reduced-motion: reduce)'), mq('(min-width: 900px)')].forEach((m) => m.addEventListener('change', setGrid));
+    setGrid();
+
+    /* phone nav: current zone plus a button that opens the list */
+    if (btn && toc) {
+      const close = () => { toc.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
+      btn.addEventListener('click', () => {
+        const open = toc.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+      $$('#toc-list a').forEach((a) => a.addEventListener('click', close));
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+      document.addEventListener('click', (e) => { if (!toc.contains(e.target)) close(); });
+    }
+    update();
+  }
+
+  /* machine tour: sticky frame on the left swaps as the steps scroll past */
+  function updateTour(vh) {
+    const steps = $$('.tour-step');
+    if (!steps.length) return;
+    const line = vh * 0.5;
+    let active = 0;
+    steps.forEach((st, i) => { if (st.getBoundingClientRect().top <= line) active = i; });
+    steps.forEach((st, i) => st.classList.toggle('is-active', i === active));
+    $$('.tour-frame .layer').forEach((l) => l.classList.toggle('on', Number(l.dataset.step) === active));
+    if (active === 2) {
+      const r = steps[2].getBoundingClientRect();
+      const q = (line - r.top) / r.height;
+      const pair = $('.tour-frame .pair');
+      if (pair) setPair(pair, clamp((q - 0.3) / 0.4, 0, 1));
+    }
+  }
+  function setupTourMode() {
+    const m = mq('(min-width: 900px) and (prefers-reduced-motion: no-preference)');
+    const apply = () => {
+      scrollState.tour = m.matches;
+      root.classList.toggle('tour-on', m.matches);
+      $$('.tour-step').forEach((st) => { if (!m.matches) st.classList.remove('is-active'); });
+      if (scrollState.update) scrollState.update();
+      if (hasGsap()) window.ScrollTrigger.refresh();
+    };
+    m.addEventListener('change', apply);
+    apply();
+  }
+
+  /* ---------- GSAP motion, opted into per media query ---------- */
+  function initMotion() {
+    if (!hasGsap()) return;
+    const { gsap, ScrollTrigger } = window;
+    gsap.registerPlugin(ScrollTrigger);
+    const mm = gsap.matchMedia();
+    mm.add({
+      desk: '(min-width: 900px) and (prefers-reduced-motion: no-preference)',
+      mob: '(max-width: 899px) and (prefers-reduced-motion: no-preference)',
+      still: '(prefers-reduced-motion: reduce)',
+    }, (ctx) => {
+      const { desk, mob } = ctx.conditions;
+      if (!desk && !mob) return undefined; // reduced motion: everything stays in its final state
+      const k = desk ? 1 : 0.5;
+      const topPin = BAR + TOC + 16;
+      const added = [];
+      const mark = (el, cls) => { el.classList.add(cls); added.push([el, cls]); };
+
+      /* hero */
+      const heroEl = $('#top');
+      if (desk) {
+        ScrollTrigger.create({
+          trigger: heroEl, start: 'top top', end: '+=150%', pin: true, anticipatePin: 1,
+          onUpdate: (self) => { hero.scrubP = hero.p0 + self.progress * (1 - hero.p0); applyHero(); },
+        });
+        gsap.timeline({ scrollTrigger: { trigger: heroEl, start: 'top top', end: '+=150%', scrub: true } })
+          .to('#hero-copy', { y: -70, opacity: 0.6, ease: 'none' }, 0)
+          .to('#hero-ghost', { yPercent: -12, ease: 'none' }, 0);
+      } else {
+        gsap.to('#hero-copy', { y: -30, opacity: 0.8, ease: 'none', scrollTrigger: { trigger: heroEl, start: 'top top', end: 'bottom top', scrub: true } });
+        gsap.to('#hero-ghost', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: heroEl, start: 'top top', end: 'bottom top', scrub: true } });
+      }
+
+      /* section headings: the dimension line draws in, end tick last */
+      $$('.sec-head').forEach((head) => {
+        const line = $('.dl-line', head);
+        const end = $('.dl-end', head);
+        const tl = gsap.timeline({ scrollTrigger: { trigger: head, start: 'top 88%', once: true } });
+        tl.fromTo(line, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.9, ease: 'power2.out' });
+        tl.fromTo(end, { scaleY: 0 }, { scaleY: 1, duration: 0.25, ease: 'power1.out' }, '>-0.05');
+      });
+
+      /* reveals: never from opacity 0 */
+      $$('[data-reveal]').forEach((el) => {
+        gsap.from(el, { opacity: 0.4, y: 16, duration: 0.7, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 92%', once: true } });
+      });
+      const group = (sel, trig, stagger) => {
+        const els = $$(sel);
+        if (els.length) gsap.from(els, { opacity: 0.4, y: 16, duration: 0.6, stagger, ease: 'power2.out', scrollTrigger: { trigger: trig || els[0], start: 'top 85%', once: true } });
+      };
+      group('#notes tbody tr', '#notes', 0.14);
+      group('#cards .card', '#cards', 0.15);
+      group('#done-tiles .dtile', '#done-tiles', 0.1);
+      group('#signblock .sb-row', '#signblock', 0.1);
+
+      /* section ghost letters drift against the content */
+      $$('.sec .ghost').forEach((g) => {
+        const sec = g.closest('.sec');
+        gsap.fromTo(g, { yPercent: -30 * k }, { yPercent: 30 * k, ease: 'none', scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true } });
+      });
+
+      /* render band */
+      const band = $('#band');
+      const bimg = $('#band-img');
+      if (band && bimg) {
+        gsap.fromTo(bimg, { scale: 1.15, yPercent: -10 * k }, { scale: 1.15, yPercent: 10 * k, ease: 'none', scrollTrigger: { trigger: band, start: 'top bottom', end: 'bottom top', scrub: true } });
+      }
+
+      /* stage staircase: pinned, one step per slice of scroll */
+      const stairEl = $('#stair');
+      if (desk && stairEl && stair.items.length) {
+        mark(root, 'stair-on');
+        stair.pinned = true;
+        stair.idx = 0;
+        drawStair();
+        const n = stair.items.length;
+        ScrollTrigger.create({
+          trigger: stairEl, start: `top ${topPin}`, end: () => `+=${Math.round(window.innerHeight * 2.4)}`, pin: true, anticipatePin: 1, invalidateOnRefresh: true,
+          onUpdate: (self) => { const i = Math.min(n - 1, Math.floor(self.progress * n)); if (i !== stair.idx) setStairActive(i); },
+        });
+      }
+
+      /* drawings strip: vertical scroll moves it sideways */
+      const hs = $('#hs');
+      const view = $('#hs-view');
+      const track = $('#hs-track');
+      if (desk && hs && view && track) {
+        mark(root, 'hs-on');
+        const dist = () => {
+          const pad = parseFloat(getComputedStyle(view).paddingLeft) || 0;
+          return Math.max(0, Math.round(track.offsetWidth + 2 * pad - view.clientWidth));
+        };
+        gsap.to(track, {
+          x: () => -dist(), ease: 'none',
+          scrollTrigger: { trigger: hs, start: `top ${topPin}`, end: () => `+=${dist()}`, pin: true, scrub: true, anticipatePin: 1, invalidateOnRefresh: true },
+        });
+      }
+
+      /* cost bars grow to scale */
+      const fills = $$('#bars .bar-row:not(.na) .bar-fill');
+      if (fills.length) {
+        /* grow once, never scrubbed: a to-scale chart must not sit at a wrong length mid-scroll */
+        gsap.fromTo(fills, { scaleX: 0.06 }, { scaleX: 1, duration: 1.1, ease: 'power2.out', scrollTrigger: { trigger: '#bars', start: 'top 90%', once: true } });
+      }
+
+      /* ticks draw in */
+      const paths = $$('#checklist .ck path');
+      if (paths.length) gsap.from(paths, { strokeDashoffset: 1, duration: 0.5, stagger: 0.25, ease: 'power1.out', scrollTrigger: { trigger: '#checklist', start: 'top 88%', once: true } });
+
+      ScrollTrigger.sort();
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+
+      return () => {
+        added.forEach(([el, cls]) => el.classList.remove(cls));
+        stair.pinned = false;
+        drawStair();
+        $$('.dl-line, .dl-end', document).forEach((el) => { el.style.clipPath = ''; el.style.transform = ''; });
+      };
+    });
   }
 
   /* ---------- 3D model, loaded only on request ---------- */
   function setupViewer() {
     const btn = $('#open3d');
     const cv = $('#viewer');
-    const img = $('#heroimg');
     const st = $('#vstate');
     if (!btn || !cv || !st) return;
     const load = (src) => new Promise((ok, bad) => {
-      const s = document.createElement('script');
-      s.src = src; s.onload = ok; s.onerror = () => bad(new Error(src));
-      document.head.appendChild(s);
+      const sc = document.createElement('script');
+      sc.src = src; sc.onload = ok; sc.onerror = () => bad(new Error(src));
+      document.head.appendChild(sc);
     });
     btn.addEventListener('click', async () => {
       btn.disabled = true;
@@ -629,12 +1104,12 @@
         const r = new T.WebGLRenderer({ canvas: cv, antialias: true });
         r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
         r.setSize(w, hgt, false);
-        const s = new T.Scene();
-        s.background = new T.Color('#eef1f4');
-        s.add(new T.HemisphereLight(0xffffff, 0x667788, 1.5));
+        const sc = new T.Scene();
+        sc.background = new T.Color('#eef1f4');
+        sc.add(new T.HemisphereLight(0xffffff, 0x667788, 1.5));
         const dl = new T.DirectionalLight(0xffffff, 1.4);
         dl.position.set(1500, 3000, 2200);
-        s.add(dl);
+        sc.add(dl);
         const cam = new T.PerspectiveCamera(30, w / hgt, 5, 20000);
         cam.position.set(2300, 2000, 2700);
         const c = new T.OrbitControls(cam, cv);
@@ -643,16 +1118,16 @@
         c.update();
         new T.GLTFLoader().load('assets/model.json', (g) => {
           g.scene.traverse((o) => { if (o.isMesh) o.material.side = T.DoubleSide; });
-          s.add(g.scene);
-          if (img) img.hidden = true;
+          sc.add(g.scene);
           cv.hidden = false;
           [w, hgt] = size(); r.setSize(w, hgt, false); cam.aspect = w / hgt; cam.updateProjectionMatrix();
           st.textContent = 'Drag to orbit, scroll to zoom, right-drag to pan.';
           btn.hidden = true;
+          if (hasGsap()) window.ScrollTrigger.refresh();
           window.addEventListener('resize', () => {
             [w, hgt] = size(); r.setSize(w, hgt, false); cam.aspect = w / hgt; cam.updateProjectionMatrix();
           });
-          (function loop() { c.update(); r.render(s, cam); requestAnimationFrame(loop); })();
+          (function loop() { c.update(); r.render(sc, cam); requestAnimationFrame(loop); })();
         }, undefined, () => {
           st.textContent = 'The 3D model could not load here. The renders above show the same assembly.';
           btn.disabled = false;
@@ -668,18 +1143,29 @@
   async function main() {
     guardImages();
     setupViewer();
+    setupPairs();
+    setupScroll();
+    setupTourMode();
+    setupCrosshair();
     plotHero();
     const { data, missing } = await loadData();
     const v = derive(data);
     fillBindings(v);
-    const steps = [renderStages, () => renderCards(data, v), renderBars, () => renderOthers(data),
-      () => renderShop(data), renderSpecs, () => renderSheet(data, v), renderChecks];
+    const steps = [renderNotes, renderStairs, renderDone, () => renderCards(data, v), renderBars, () => renderOthers(data),
+      () => renderShop(data), renderSpecs, () => renderSheet(data, v), renderChecks, renderSign];
     steps.forEach((fn) => { try { fn(v); } catch (e) { console.error(e); } });
     if (missing.length) {
       $('#draft-list').textContent = missing.map((m) => `${m}.json`).join(', ');
       $('#draft').hidden = false;
     }
-    setupMotion();
+    setupCounts();
+    initMotion();
+    if (scrollState.update) scrollState.update();
+    const refresh = () => { if (hasGsap()) window.ScrollTrigger.refresh(); if (scrollState.update) scrollState.update(); };
+    if (document.readyState === 'complete') refresh(); else window.addEventListener('load', refresh);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+    let t = null;
+    $$('img').forEach((img) => { if (!img.complete) img.addEventListener('load', () => { clearTimeout(t); t = setTimeout(refresh, 120); }, { once: true }); });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', main);
