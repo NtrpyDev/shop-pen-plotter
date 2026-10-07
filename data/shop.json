@@ -40,7 +40,7 @@
    "part": "X motor / idler plate OP1",
    "qty": 2,
    "setups": 1,
-   "est_minutes": 7.9
+   "est_minutes": 8.2
   },
   {
    "program": "O60061_X_CLAMP_BAR_OP1.nc",
@@ -61,7 +61,7 @@
    "part": "Y motor/idler bracket A OP1",
    "qty": 2,
    "setups": 1,
-   "est_minutes": 1.5
+   "est_minutes": 1.6
   },
   {
    "program": "O60082_Y_BRACKET_A_OP2.nc",
@@ -75,7 +75,7 @@
    "part": "Y motor/idler bracket B (mirror of A) OP1",
    "qty": 2,
    "setups": 1,
-   "est_minutes": 1.5
+   "est_minutes": 1.6
   },
   {
    "program": "O60092_Y_BRACKET_B_OP2.nc",
@@ -110,7 +110,7 @@
    "part": "Paper corner stop bar OP1",
    "qty": 2,
    "setups": 1,
-   "est_minutes": 0.7
+   "est_minutes": 0.6
   },
   {
    "program": "O60122_PAPER_STOP_OP2.nc",
@@ -164,12 +164,12 @@
    {
     "part": "Y_LIMIT_BRACKET_R",
     "qty": 1,
-    "grams_each": 2.4
+    "grams_each": 2.1
    },
    {
     "part": "Y_LIMIT_BRACKET_L",
     "qty": 1,
-    "grams_each": 2.4
+    "grams_each": 2.1
    },
    {
     "part": "PEN_TOOL",
@@ -189,17 +189,17 @@
    {
     "part": "DOCK_STOP",
     "qty": 1,
-    "grams_each": 0.5
+    "grams_each": 0.4
    },
    {
     "part": "Y_IDLER_SPACER",
     "qty": 2,
-    "grams_each": 0.3
+    "grams_each": 0.2
    },
    {
     "part": "X_IDLER_SPACER",
     "qty": 1,
-    "grams_each": 0.3
+    "grams_each": 0.4
    },
    {
     "part": "PEN_SET_BLOCK",
@@ -207,7 +207,7 @@
     "grams_each": 9.0
    }
   ],
-  "grams_est": 89,
+  "grams_est": 88,
   "assumptions": [
    "PETG 1.27 g/cm3, 0.5 effective infill factor applied to STL solid volume, quantities from printed-parts.md.",
    "Excludes supports, purge, and failed prints."
