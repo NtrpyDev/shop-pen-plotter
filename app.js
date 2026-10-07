@@ -1,4 +1,4 @@
-/* Shop Pen Plotter proposal v2: loads data/*.json, fills the page, layers scroll motion on top.
+/* Shop Pen Plotter proposal v3: loads data/*.json, fills the page, layers scroll motion on top.
    Everything renders in its final state first. GSAP is optional: without it (or with reduced
    motion, or without JS) the page is complete and still. */
 (() => {
@@ -14,6 +14,7 @@
   const has = (v) => v !== undefined && v !== null && v !== '';
   const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
   const BAR = 26, TOC = 40;
+  const TABS = ['summary', 'spend', 'done', 'machine', 'cost', 'parts'];
 
   /* ---------- formatting ---------- */
   function usd(v, round) {
@@ -72,6 +73,7 @@
       default: return usd(x, true);
     }
   }
+  const fmtRange = (lo, hi) => `${usd(lo, true)}-${usd(hi, true)}`;
   /* A number that counts up once when it enters. Final text is already in place. */
   function cnt(value, kind, cls) {
     const n = h('span', { class: cls || null, 'data-count': '' });
@@ -80,26 +82,16 @@
     n.textContent = isNum(value) ? fmtCount(kind, value) : 'TBD';
     return n;
   }
-  function cntRange(lo, hi, cls) {
-    const n = h('span', { class: cls || null, 'data-count': '' });
-    n.dataset.fmt = 'range';
-    if (isNum(lo) && isNum(hi)) { n.dataset.lo = String(lo); n.dataset.hi = String(hi); }
-    n.textContent = isNum(lo) && isNum(hi) ? `${num(lo, 0)}-${num(hi, 0)}` : 'TBD';
-    return n;
-  }
   function countUp(n) {
     const kind = n.dataset.fmt;
     const t0 = performance.now();
     const dur = 900;
+    const isRange = kind === 'usdrange';
+    if (isRange ? !n.dataset.lo : !isNum(parseFloat(n.dataset.value))) return;
     const set = (e) => {
-      if (kind === 'range') {
-        n.textContent = `${num(parseFloat(n.dataset.lo) * e, 0)}-${num(parseFloat(n.dataset.hi) * e, 0)}`;
-      } else {
-        const t = parseFloat(n.dataset.value);
-        n.textContent = fmtCount(kind, t * e);
-      }
+      if (isRange) n.textContent = fmtRange(parseFloat(n.dataset.lo) * e, parseFloat(n.dataset.hi) * e);
+      else n.textContent = fmtCount(kind, parseFloat(n.dataset.value) * e);
     };
-    if (kind === 'range' ? !n.dataset.lo : !isNum(parseFloat(n.dataset.value))) return;
     const step = (t) => {
       const k = Math.min(1, (t - t0) / dur);
       set(1 - Math.pow(1 - k, 3));
@@ -121,6 +113,7 @@
 
   /* ---------- data ---------- */
   const FILES = ['content', 'budget', 'prebuilt', 'shop'];
+  const OPTIONAL = ['parts', 'exploded', 'explode']; // delivered later; the page degrades without them
   async function loadData() {
     const out = {};
     const missing = [];
@@ -135,8 +128,19 @@
         missing.push(name);
       }
     }));
+    await Promise.all(OPTIONAL.map(async (name) => {
+      try {
+        const r = await fetch(`data/${name}.json`, { cache: 'no-cache' });
+        if (!r.ok) throw new Error(r.status);
+        out[name] = await r.json();
+      } catch (e) {
+        out[name] = null;
+      }
+    }));
     return { data: out, missing };
   }
+
+  const r50 = (x) => (isNum(x) ? Math.round(x / 50) * 50 : null);
 
   function derive(d) {
     const c = d.content || {};
@@ -153,6 +157,8 @@
     const pens = ((c.supplies || {}).items || [])[0];
     const s1 = stages[0] && stages[0][2];
     const m = /\$\d[\d,]*/.exec(c.risk_first || '');
+    const cheapOk = !b.placeholder && isNum(b.total);
+    const amts = stages.map((x) => x[2]).filter(isNum);
     const v = {
       content: c,
       shop: sh,
@@ -160,18 +166,25 @@
       stages,
       recTotal: rec.total,
       recDate,
-      cheapTotal: b.total,
+      cheapTotal: cheapOk ? b.total : undefined,
+      cheapOk,
       cheapDate: txt(b.date),
+      cheapProvisional: /provisional/i.test(String(b.summary || '')),
       preTotal,
       preDate: txt(p.date),
       zero: 0,
       firstOrder: isNum(s1) && pens && isNum(pens[1]) ? Math.round(s1 + pens[1]) : null,
+      largestOrder: amts.length ? Math.max(...amts) : null,
+      diyLow: cheapOk ? r50(b.total) : null,
+      diyHigh: r50(rec.total),
       slideCost: m ? m[0] : 'TBD',
       saveRec: isNum(preTotal) && isNum(rec.total) ? preTotal - rec.total : null,
-      saveCheap: isNum(preTotal) && isNum(b.total) ? preTotal - b.total : null,
+      saveCheap: isNum(preTotal) && cheapOk ? preTotal - b.total : null,
     };
     v.recDateLine = `parts only, priced ${recDate}`;
-    v.cheapDateLine = `parts only, priced ${v.cheapDate}`;
+    v.cheapDateLine = v.cheapProvisional
+      ? `materials incl. shipping, priced ${v.cheapDate}; some prices provisional`
+      : `parts only, priced ${v.cheapDate}`;
     v.preDateLine = `price read ${v.preDate}`;
     v.recNoteLine = rec.notes || '';
     return v;
@@ -194,21 +207,39 @@
       n.textContent = isNum(x) ? fmtCount(n.dataset.fmt, x) : 'TBD';
       if (!isNum(x)) n.classList.add('tbd');
     });
+    const diy = $('#diy-range');
+    if (diy) {
+      if (isNum(v.diyLow) && isNum(v.diyHigh)) {
+        diy.dataset.count = '';
+        diy.dataset.fmt = 'usdrange';
+        diy.dataset.lo = String(v.diyLow);
+        diy.dataset.hi = String(v.diyHigh);
+        diy.textContent = fmtRange(v.diyLow, v.diyHigh);
+      } else {
+        diy.textContent = 'TBD';
+        diy.classList.add('tbd');
+      }
+    }
   }
 
   /* A: general notes */
   function renderNotes(v) {
-    const sh = v.shop;
-    const pr = sh.printed || {};
     const items = [
-      ['What it is:', ' a flatbed pen plotter for white-on-blue prints and drafting film, up to 36 x 48 in, built in the shop.'],
-      ['What it costs:', ` ${usd(v.recTotal)} in materials for the recommended build, before shipping and tax.`],
+      ['What it is:', ' a flatbed pen plotter for white-on-blue prints and drafting film, up to 36" x 48", built in the shop.'],
+      ['What it costs:', ` ${usd(v.recTotal)} in materials for the recommended build, before shipping and tax, vs ${usd(v.preTotal, true)} for the cheapest pre-built that takes these pens.`],
       ['How the money goes out:', ` ${word(v.stages.length)} orders, smallest first. The first is ${isNum(v.firstOrder) ? usd(v.firstOrder, true) : 'TBD'} and proves the design before any metal is cut.`],
-      ['What is already done:', ' the design, every Haas program, the drawings, the wiring, the firmware settings and the plotting software. Nothing has been bought.'],
-      ['What it needs from the shop:', ` about ${num(sh.total_cycle_hours)} h of spindle time plus ${num(sh.setup_hours_estimate)} h of setup on the Haas, ${num(pr.grams_est, 0)} g of printer filament, and Noah's assembly time.`],
+      ['What is already done:', ' the design, every CNC program, the drawings, the wiring diagram, the firmware settings and the plotting software. Nothing has been bought.'],
+      ['What it needs from the shop:', " the VF-3SS (or any 3-axis mill) for the machined parts, the 3D printer for the printed parts, and Noah's assembly work."],
     ];
     const tb = $('#notes tbody');
     items.forEach(([k, t], i) => tb.append(h('tr', null, h('td', { class: 'n' }, String(i + 1)), h('td', null, h('b', null, k), t))));
+  }
+
+  function renderSpecs(v) {
+    const t = $('#specs');
+    const tb = h('tbody');
+    (v.content.specs || []).forEach(([k, x]) => tb.append(h('tr', null, h('th', { scope: 'row' }, k), h('td', null, x))));
+    t.append(tb);
   }
 
   /* B: stage staircase */
@@ -335,7 +366,7 @@
     const tile = (node, label) => h('div', { class: 'dtile' }, h('dd', null, node), h('dt', null, label));
     const dl = $('#done-tiles');
     dl.append(
-      tile(cnt(progs.length, 'int', 'big num'), 'Haas programs, verified and backplotted'),
+      tile(cnt(progs.length, 'int', 'big num'), 'CNC programs, verified and backplotted'),
       tile(cnt(machined, 'int', 'big num'), 'machined parts'),
       tile(cnt(printedQty, 'int', 'big num'), `printed parts, ${num(pr.grams_est, 0)} g PETG`),
       tile(cnt(0, 'int', 'big num'), 'hole-alignment fit failures'),
@@ -373,6 +404,7 @@
     });
   }
 
+
   const DIY_SUPPORT = 'No machine warranty. Parts carry their makers\' terms and the shop does its own repairs.';
 
   function renderCards(d, v) {
@@ -380,7 +412,9 @@
     const rec = (v.content.recommended || {});
     const best = (d.prebuilt || {}).best_match || {};
 
-    $('#cost-intro').textContent = `Buying a machine that takes a 36 x 48 sheet and these pens starts at ${usd(best.price, true)}. Building the cheapest possible version costs less but gives up accuracy and needs a redesign.`;
+    const lowTxt = isNum(v.diyLow) ? usd(v.diyLow, true) : 'TBD';
+    const highTxt = isNum(v.diyHigh) ? usd(v.diyHigh, true) : 'TBD';
+    $('#cost-intro').textContent = `Buying a machine that takes a 36" x 48" sheet and these pens starts at ${usd(best.price, true)}. Building the same machine costs ${lowTxt} to ${highTxt} in materials, depending on where the parts come from.`;
 
     rows('#rows-cheap', [
       ['What you get', b.summary],
@@ -430,9 +464,10 @@
     return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag;
   }
 
+
   function renderBars(v) {
     const items = [
-      { key: 'cheap', label: 'Cheapest build', sub: `priced ${v.cheapDate}`, value: v.cheapTotal },
+      { key: 'cheap', label: 'Low-cost build', sub: `priced ${v.cheapDate}`, value: v.cheapTotal },
       { key: 'rec', label: 'Recommended build', sub: `priced ${v.recDate}`, value: v.recTotal },
       { key: 'pre', label: 'Buy pre-built', sub: `price read ${v.preDate}`, value: v.preTotal },
     ];
@@ -464,13 +499,13 @@
     const sav = $('#savings');
     [
       ['Recommended build vs buying', v.saveRec],
-      ['Cheapest build vs buying', v.saveCheap],
+      ['Low-cost build vs buying', v.saveCheap],
     ].forEach(([label, amt]) => {
       const pos = isNum(amt) && amt >= 0;
       sav.append(h('div', { class: `save${isNum(amt) && !pos ? ' neg' : ''}` },
         h('span', { class: 'save-txt' }, label),
         h('span', { class: 'save-amt money' }, isNum(amt) ? usd(Math.abs(amt), true) : 'TBD'),
-        h('span', { class: 'save-sub' }, isNum(amt) ? 'on materials; shop time is section F' : 'waiting on prices')));
+        h('span', { class: 'save-sub' }, isNum(amt) ? 'on materials' : 'waiting on prices')));
     });
   }
 
@@ -480,83 +515,25 @@
     if (!others.length) return;
     const t = $('#others');
     t.append(h('caption', { class: 'sr' }, 'Other pre-built machines'));
+    const heads = ['Machine', 'Price', 'Size', 'Fits 36" x 48"', 'Pens', 'Accuracy', 'Notes'];
     t.append(h('thead', null, h('tr', null,
-      ['Machine', 'Price', 'Size', 'Fits 36 x 48', 'Pens', 'Accuracy', 'Notes'].map((x, i) => h('th', { class: i === 1 ? 'r' : null, scope: 'col' }, x)))));
+      heads.map((x, i) => h('th', { class: i === 1 ? 'price' : null, scope: 'col' }, x)))));
     const tb = h('tbody');
     others.forEach((o) => {
       const fits = o.fits_36x48 === true ? 'Yes' : o.fits_36x48 === false ? 'No' : o.fits_36x48;
       const name = link(o.url, txt(o.name)) || val(o.name);
       tb.append(h('tr', null,
-        h('th', { scope: 'row' }, name),
-        h('td', { class: 'r m' }, isNum(o.price) ? usd(o.price, true) : val(o.price)),
-        h('td', { class: 'd' }, val(o.size)),
-        h('td', { class: 'd' }, val(fits)),
-        h('td', { class: 'd full' }, val(o.pens)),
-        h('td', { class: 'd full' }, val(o.accuracy)),
-        h('td', { class: 'd full' }, val(o.notes))));
+        h('th', { scope: 'row', class: 'name' }, name),
+        h('td', { class: 'price', 'data-label': 'Price' }, isNum(o.price) ? usd(o.price, true) : val(o.price)),
+        h('td', { class: 'd', 'data-label': 'Size' }, val(o.size)),
+        h('td', { class: 'd', 'data-label': 'Fits 36" x 48"' }, val(fits)),
+        h('td', { class: 'd', 'data-label': 'Pens' }, val(o.pens)),
+        h('td', { class: 'd', 'data-label': 'Accuracy' }, val(o.accuracy)),
+        h('td', { class: 'd notes', 'data-label': 'Notes' }, val(o.notes))));
     });
     t.append(tb);
     $('#others-wrap').append(h('p', { class: 'note' }, `Prices read ${txt(p.date)}.`));
     $('#others-wrap').hidden = false;
-  }
-
-  /* F: shop time, and the G program table */
-  function renderShop(d) {
-    const sh = d.shop || {};
-    const progs = sh.programs || [];
-    const lab = sh.labour_hours_estimate || {};
-    const pr = sh.printed || {};
-    const cyc = sh.total_cycle_hours;
-    const set = sh.setup_hours_estimate;
-    const lo = [cyc, set, lab.low].every(isNum) ? cyc + set + lab.low : null;
-    const hi = [cyc, set, lab.high].every(isNum) ? cyc + set + lab.high : null;
-
-    const tile = (label, big, unit, sub, cls) => h('div', { class: `tile${cls ? ' ' + cls : ''}` },
-      h('dt', null, label),
-      h('dd', null, big, unit ? h('span', { class: 'unit' }, unit) : null, h('span', { class: 'sub' }, sub)));
-    $('#shop-tiles').append(
-      tile('Mill spindle time', cnt(cyc, 'dec1', 'big num'), 'h', `${progs.length} programs, all quantities; estimate`),
-      tile('Setups and blank prep', cnt(set, 'dec1', 'big num'), 'h', 'estimate'),
-      tile('Assembly, wiring, setup', cntRange(lab.low, lab.high, 'big num'), 'h', 'rough estimate, not measured'),
-      tile('Total shop time', cntRange(lo, hi, 'big num'), 'h', 'estimate; sum of the three', 'total'),
-    );
-
-    const ul = $('#printed');
-    if (Array.isArray(pr.parts) && pr.parts.length) {
-      pr.parts.forEach((x) => ul.append(h('li', null,
-        h('span', null, `${txt(x.qty)} x ${txt(x.part)}`),
-        h('span', null, isNum(x.grams_each) ? `${num(x.grams_each)} g each` : ''))));
-    } else if (typeof (d.content.shop_parts || {}).printed_parts === 'string') {
-      ul.append(h('li', null, h('span', null, d.content.shop_parts.printed_parts)));
-    }
-    ul.append(h('li', null, h('span', null, 'Filament, estimate'), h('span', null, isNum(pr.grams_est) ? `${num(pr.grams_est, 0)} g` : 'TBD')));
-
-    const as = $('#shop-assume');
-    [...(sh.assumptions || []), ...(pr.assumptions || []).map((x) => `Printed parts: ${x}`),
-      has(lab.basis) ? `Assembly hours: ${lab.basis}` : null]
-      .filter(has).forEach((x) => as.append(h('li', null, val(x))));
-
-    const t = $('#programs');
-    t.append(h('thead', null, h('tr', null,
-      h('th', { scope: 'col' }, 'Program'), h('th', { scope: 'col' }, 'Part'),
-      h('th', { scope: 'col', class: 'r' }, 'Qty'), h('th', { scope: 'col', class: 'r hide-sm' }, 'Setups'),
-      h('th', { scope: 'col', class: 'r' }, 'Min each'))));
-    const tb = h('tbody');
-    let qty = 0;
-    progs.forEach((p) => {
-      if (isNum(p.qty)) qty += p.qty;
-      const id = typeof p.program === 'string' ? p.program.replace(/\.nc$/i, '').split('_')[0] : p.program;
-      tb.append(h('tr', null,
-        h('td', { class: 'prog', title: p.program || null }, val(id)),
-        h('td', null, val(p.part)),
-        h('td', { class: 'r m' }, val(p.qty)),
-        h('td', { class: 'r m hide-sm' }, val(p.setups)),
-        h('td', { class: 'r m' }, isNum(p.est_minutes) ? num(p.est_minutes) : val(p.est_minutes))));
-    });
-    t.append(tb);
-    t.append(h('tfoot', null, h('tr', null,
-      h('th', { scope: 'row', colspan: '2' }, `${progs.length} programs, ${qty} parts: mill spindle time, estimate`),
-      h('td', { class: 'r m', colspan: '3' }, `${num(cyc)} h`))));
   }
 
   function moneyTable(sel, head, items, total, totalLabel) {
@@ -568,7 +545,141 @@
     if (totalLabel) t.append(h('tfoot', null, h('tr', null, h('th', { scope: 'row' }, totalLabel), h('td', { class: 'r m' }, usd(total)))));
   }
 
-  /* G: parts sheet */
+  /* F: made parts (from parts.json, if it has arrived) */
+  function renderMade(parts) {
+    const list = Array.isArray(parts) ? parts.filter((x) => x && has(x.part)) : [];
+    if (!list.length) return;
+    const t = $('#made');
+    const heads = ['Part', 'Qty', 'Process', 'Size (in)', 'Material', 'Est. time each', 'Filament'];
+    t.append(h('thead', null, h('tr', null, heads.map((x, i) => h('th', { scope: 'col', class: i === 1 ? 'r' : null }, x)))));
+    const tb = h('tbody');
+    [['machined', 'Machined'], ['printed', 'Printed']].forEach(([kind, label]) => {
+      const set = list.filter((x) => String(x.kind).toLowerCase() === kind);
+      if (!set.length) return;
+      tb.append(h('tr', { class: 'grp' }, h('th', { scope: 'colgroup', colspan: '7' }, label)));
+      set.forEach((x) => tb.append(h('tr', null,
+        h('th', { scope: 'row', class: 'pname' }, txt(x.part)),
+        h('td', { class: 'r m', 'data-label': 'Qty' }, val(x.qty)),
+        h('td', { 'data-label': 'Process' }, label),
+        h('td', { class: 'm', 'data-label': 'Size (in)' }, has(x.size_in) ? `${x.size_in} in` : ''),
+        h('td', { 'data-label': 'Material' }, val(x.material)),
+        h('td', { class: 'm', 'data-label': 'Est. time each' }, has(x.est_time_each) ? String(x.est_time_each) : ''),
+        h('td', { class: 'm', 'data-label': 'Filament' }, isNum(x.filament_g) ? `${num(x.filament_g, 0)} g` : ''))));
+    });
+    t.append(tb);
+    $('#made-wrap').hidden = false;
+  }
+
+  /* F: the CNC programs, with a drawing preview on hover, focus or tap */
+  function renderPrograms(d) {
+    const progs = (d.shop || {}).programs || [];
+    const t = $('#programs');
+    t.append(h('thead', null, h('tr', null,
+      h('th', { scope: 'col' }, 'Program'), h('th', { scope: 'col' }, 'Part'),
+      h('th', { scope: 'col', class: 'r' }, 'Qty'), h('th', { scope: 'col', class: 'r' }, 'Setups'))));
+    const tb = h('tbody');
+    progs.forEach((p) => {
+      const id = typeof p.program === 'string' ? p.program.replace(/\.nc$/i, '').split('_')[0] : p.program;
+      tb.append(h('tr', { tabindex: '0', 'data-prog': has(id) ? String(id) : null },
+        h('td', { class: 'prog', title: p.program || null }, val(id)),
+        h('td', null, val(p.part)),
+        h('td', { class: 'r m' }, val(p.qty)),
+        h('td', { class: 'r m' }, val(p.setups))));
+    });
+    t.append(tb);
+    setupProgPreview(tb);
+  }
+
+  function setupProgPreview(tb) {
+    const pv = $('#prog-pv');
+    const pimg = $('img', pv);
+    const ov = $('#pv-overlay');
+    const oimg = $('img', ov);
+    const fine = mq('(hover: hover) and (pointer: fine)');
+    const srcOf = (id) => `assets/drawings/${encodeURIComponent(id)}.png`;
+    const ok = new Map();
+    const probe = (id) => {
+      if (ok.has(id)) return ok.get(id);
+      const pr = new Promise((res) => {
+        const im = new Image();
+        im.onload = () => res(true);
+        im.onerror = () => res(false);
+        im.src = srcOf(id);
+      });
+      ok.set(id, pr);
+      return pr;
+    };
+    let cur = null;
+    let pos = { x: 0, y: 0, row: null };
+    const place = () => {
+      const w = pv.offsetWidth || 520;
+      const hh = pv.offsetHeight || 400;
+      const vw = window.innerWidth, vh = window.innerHeight;
+      let left, top;
+      if (pos.row) {
+        const r = pos.row.getBoundingClientRect();
+        left = r.right - w - 8; top = r.bottom + 8;
+        if (top + hh > vh - 12) top = r.top - hh - 8;
+      } else {
+        left = pos.x + 24; top = pos.y - hh / 2;
+        if (left + w > vw - 12) left = pos.x - w - 24;
+      }
+      left = clamp(left, 12, Math.max(12, vw - w - 12));
+      top = clamp(top, 12, Math.max(12, vh - hh - 12));
+      pv.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+    };
+    const hide = () => { cur = null; pv.classList.remove('on'); pv.hidden = true; };
+    const show = async (row) => {
+      const id = row.dataset.prog;
+      if (!id) return;
+      cur = id;
+      if (!(await probe(id)) || cur !== id) { if (cur === id) hide(); return; }
+      if (pimg.getAttribute('src') !== srcOf(id)) pimg.src = srcOf(id);
+      pv.hidden = false;
+      place();
+      requestAnimationFrame(() => { if (cur === id) { place(); pv.classList.add('on'); } });
+    };
+    let last = 'mouse';
+    let hoverRow = null;
+    tb.addEventListener('pointerdown', (e) => { last = e.pointerType; });
+    tb.addEventListener('pointerover', (e) => {
+      if (e.pointerType !== 'mouse' || !fine.matches) return;
+      const row = e.target.closest('tr[data-prog]');
+      if (!row || row === hoverRow) return;
+      hoverRow = row;
+      pos = { x: e.clientX, y: e.clientY, row: null };
+      show(row);
+    });
+    tb.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || !fine.matches || !cur) return;
+      pos.x = e.clientX; pos.y = e.clientY; pos.row = null;
+      if (!pv.hidden) place();
+    });
+    tb.addEventListener('pointerleave', () => { hoverRow = null; hide(); });
+    tb.addEventListener('focusin', (e) => {
+      const row = e.target.closest('tr[data-prog]');
+      if (!row || last === 'touch') return;
+      pos = { x: 0, y: 0, row };
+      show(row);
+    });
+    tb.addEventListener('focusout', hide);
+    tb.addEventListener('click', async (e) => {
+      const row = e.target.closest('tr[data-prog]');
+      if (!row || (e.pointerType !== 'touch' && last !== 'touch' && fine.matches)) return;
+      const id = row.dataset.prog;
+      if (!(await probe(id))) return;
+      oimg.src = srcOf(id);
+      ov.hidden = false;
+      $('#pv-close').focus();
+    });
+    const closeOv = () => { ov.hidden = true; };
+    $('#pv-close').addEventListener('click', closeOv);
+    ov.addEventListener('click', (e) => { if (e.target === ov) closeOv(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeOv(); hide(); } });
+    window.addEventListener('scroll', () => { if (cur && !pv.hidden && !pos.row) hide(); }, { passive: true });
+  }
+
+  /* F: stage table, categories, low-cost list */
   function renderSheet(d, v) {
     const rec = v.content.recommended || {};
     const t = $('#stage-table');
@@ -590,18 +701,13 @@
     moneyTable('#group-table', ['Category', `Subtotal, ${v.recDate}`],
       (rec.groups || []).map(([n, a]) => [n, a]), rec.total, 'Total');
 
-    const sup = v.content.supplies || {};
-    const supItems = sup.items || [];
-    const supTotal = supItems.reduce((a, [, x]) => a + (isNum(x) ? x : 0), 0);
-    moneyTable('#supplies-table', ['Item', `Price, ${sup.date || v.recDate}`], supItems, supTotal, 'Supplies total');
-
     const b = d.budget || {};
     moneyTable('#cheap-groups', ['Group', `Subtotal, ${v.cheapDate}`],
-      (b.groups || []).map(([n, a]) => [n, a]), b.total, 'Cheapest build total');
+      (b.groups || []).map(([n, a]) => [n, a]), b.total, 'Low-cost build total');
     const lines = b.lines || [];
     if (lines.length) {
       const lt = $('#cheap-lines');
-      lt.append(h('caption', { class: 'sr' }, 'Cheapest build line items'));
+      lt.append(h('caption', { class: 'sr' }, 'Low-cost build line items'));
       lt.append(h('thead', null, h('tr', null,
         ['Item', 'Qty', 'Each', 'Total', 'Vendor'].map((x, i) => h('th', { scope: 'col', class: i > 0 && i < 4 ? 'r' : null }, x)))));
       const lb = h('tbody');
@@ -611,10 +717,10 @@
           group = l.group;
           lb.append(h('tr', { class: 'grp' }, h('th', { scope: 'rowgroup', colspan: '5', class: 'm full' }, group)));
         }
-        const spec = has(l.spec) && l.spec !== 'TBD' ? h('span', { class: 'd' }, ` ${l.spec}`) : null;
+        /* the raw listing title (spec) stays in the CSV; the page shows the plain item name */
         const vend = link(l.url, txt(l.vendor)) || val(l.vendor);
         lb.append(h('tr', null,
-          h('td', { class: 'full' }, val(l.item), spec, has(l.notes) && l.notes !== 'TBD' ? h('div', { class: 'd' }, l.notes) : null),
+          h('td', { class: 'full' }, val(l.item), has(l.notes) && l.notes !== 'TBD' ? h('div', { class: 'd' }, l.notes) : null),
           h('td', { class: 'r m' }, val(l.qty)),
           h('td', { class: 'r m' }, isNum(l.unit) ? usd(l.unit) : val(l.unit)),
           h('td', { class: 'r m' }, isNum(l.ext) ? usd(l.ext) : val(l.ext)),
@@ -624,27 +730,39 @@
     }
   }
 
-  function renderSpecs(v) {
-    const t = $('#specs');
-    const tb = h('tbody');
-    (v.content.specs || []).forEach(([k, x]) => tb.append(h('tr', null, h('th', { scope: 'row' }, k), h('td', null, x))));
-    t.append(tb);
-  }
-
-  /* H: checks with drawn ticks */
-  function renderChecks(v) {
-    const ul = $('#checklist');
-    (v.content.checks || []).forEach((c) => {
-      const ck = s('svg', { class: 'ck', viewBox: '0 0 20 20', 'aria-hidden': 'true' }, s('path', { d: 'M3 10.5 L8 15.5 L17 5', pathLength: 1 }));
-      ul.append(h('li', null, ck, c));
+  /* D: exploded views (from exploded.json, if it has arrived) */
+  function renderExploded(list) {
+    if (!Array.isArray(list) || !list.length) return;
+    const wrap = $('#exp');
+    const sel = $('#exp-sel');
+    const body = $('#exp-body');
+    const kindLabel = { machined: 'Machined', printed: 'Printed', bought: 'Bought' };
+    const show = (i) => {
+      const it = list[i];
+      $$('button', sel).forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
+      const img = has(it.image) ? (/[\/]/.test(it.image) ? it.image : `assets/exploded/${it.image}`) : null;
+      const fig = h('figure', { class: 'exp-fig' });
+      if (img) {
+        const im = h('img', { src: img, alt: `Exploded view, ${txt(it.title)}: parts are numbered to match the list`, loading: 'lazy' });
+        im.addEventListener('error', () => { fig.hidden = true; }, { once: true });
+        fig.append(im);
+      }
+      fig.append(h('figcaption', null, txt(it.title)));
+      const t = h('table', { class: 'data compact exp-parts' },
+        h('caption', { class: 'sr' }, `Parts in ${txt(it.title)}`),
+        h('thead', null, h('tr', null, ['No.', 'Part', 'Qty', 'Kind'].map((x, k) => h('th', { scope: 'col', class: k === 2 ? 'r' : null }, x)))),
+        h('tbody', null, (it.parts || []).map((p) => h('tr', null,
+          h('td', { class: 'n' }, txt(p.n)), h('td', null, txt(p.name)), h('td', { class: 'r m' }, txt(p.qty)),
+          h('td', { class: 'd' }, kindLabel[p.kind] || txt(p.kind))))));
+      body.replaceChildren(fig, h('div', { class: 'table-wrap' }, t));
+    };
+    list.forEach((it, i) => {
+      const b = h('button', { class: 'btn', type: 'button', 'aria-pressed': 'false' }, txt(it.title));
+      b.addEventListener('click', () => show(i));
+      sel.append(b);
     });
-  }
-
-  /* J: sign-off */
-  function renderSign(v) {
-    const a = $('#sb-amount');
-    a.replaceChildren(cnt(v.firstOrder, 'usd0'));
-    $('#sb-then').textContent = `${word(Math.max(0, v.stages.length - 1))} more stages, each approved on its own, ${usd(v.recTotal)} total`;
+    show(0);
+    wrap.hidden = false;
   }
 
   /* ---------- images that are not there yet ---------- */
@@ -659,193 +777,6 @@
     });
   }
 
-  /* ---------- the hero drawing: plotted by a pen, scrubbed by scroll ---------- */
-  const hero = { draw: null, p0: 0, autoP: 0, scrubP: 0, ready: false };
-  const applyHero = () => { if (hero.draw) hero.draw(Math.max(hero.autoP, hero.scrubP)); };
-  let heroSvg = null;
-  const PART_W = 200, PART_H = 175;
-
-  async function plotHero() {
-    if (reduce) return; // the <img> already shows the finished drawing; the readout already says PLOT COMPLETE
-    const box = $('#plot');
-    const img = box && box.querySelector('img');
-    if (!img) return;
-    let src;
-    try {
-      const r = await fetch(img.getAttribute('src'));
-      if (!r.ok) return;
-      src = await r.text();
-    } catch (e) { return; }
-    const doc = new DOMParser().parseFromString(src, 'image/svg+xml');
-    const rootEl = doc.documentElement;
-    if (!rootEl || rootEl.nodeName.toLowerCase() !== 'svg' || doc.querySelector('parsererror')) return;
-    rootEl.querySelectorAll('script, foreignObject, a').forEach((n) => n.remove());
-    [rootEl, ...rootEl.querySelectorAll('*')].forEach((n) => [...n.attributes].forEach((a) => {
-      if (/^on/i.test(a.name) || /href$/i.test(a.name)) n.removeAttribute(a.name);
-    }));
-    const svg = document.importNode(rootEl, true);
-    svg.removeAttribute('width');
-    svg.removeAttribute('height');
-    svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', img.alt);
-    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-    img.replaceWith(svg);
-    heroSvg = svg;
-
-    const vb = svg.viewBox.baseVal;
-    const unit = vb && vb.width ? vb.width : 200;
-    const shapes = $$('path, circle, ellipse, line, polyline, polygon, rect', svg);
-    const texts = $$('text', svg);
-    const toRoot = (el) => {
-      let m = null;
-      for (let n = el; n && n !== svg; n = n.parentNode) {
-        const list = n.transform && n.transform.baseVal;
-        const c = list && list.numberOfItems ? list.consolidate() : null;
-        if (c) m = m ? c.matrix.multiply(m) : c.matrix;
-      }
-      return m;
-    };
-
-    const segs = [];
-    shapes.forEach((sh) => {
-      sh.removeAttribute('pathLength');
-      let len = 0;
-      try { len = sh.getTotalLength(); } catch (e) { len = 0; }
-      if (!(len > 0)) return;
-      let m = null;
-      try { m = toRoot(sh); } catch (e) { m = null; }
-      const filled = getComputedStyle(sh).fill !== 'none';
-      sh.style.strokeDasharray = `${len} ${len}`;
-      sh.style.strokeDashoffset = String(len);
-      if (filled) sh.style.fillOpacity = '0';
-      segs.push({ s: sh, len, m, filled, k: 0 });
-    });
-    texts.forEach((t) => { t.style.opacity = '0'; });
-    if (!segs.length) { texts.forEach((t) => { t.style.opacity = ''; }); return; }
-
-    const pen = s('g', { class: 'pen' });
-    const r = unit * 0.016;
-    const ring = s('circle', { r });
-    const cross = s('path', { d: `M${-r * 2.2},0 H${-r * 1.2} M${r * 1.2},0 H${r * 2.2} M0,${-r * 2.2} V${-r * 1.2} M0,${r * 1.2} V${r * 2.2}` });
-    pen.setAttribute('stroke-width', String(unit * 0.004));
-    pen.append(ring, cross);
-    svg.append(pen);
-
-    const pt = (seg, at) => {
-      let p = seg.s.getPointAtLength(at);
-      if (seg.m) p = p.matrixTransform(seg.m);
-      return p;
-    };
-    const total = segs.reduce((a, g) => a + g.len, 0);
-    const drawSpeed = total / 3.6;
-    const travelSpeed = drawSpeed * 4;
-    const plan = [];
-    let prevEnd = null;
-    let t = 0;
-    segs.forEach((g) => {
-      const start = pt(g, 0);
-      if (prevEnd) {
-        const dist = Math.hypot(start.x - prevEnd.x, start.y - prevEnd.y);
-        const dur = Math.min(0.35, Math.max(0.04, dist / travelSpeed));
-        plan.push({ kind: 'up', from: prevEnd, to: start, t0: t, t1: t + dur });
-        t += dur;
-      }
-      const dur = Math.max(0.06, g.len / drawSpeed);
-      plan.push({ kind: 'down', g, t0: t, t1: t + dur });
-      t += dur;
-      prevEnd = pt(g, g.len);
-    });
-    const Tt = t;
-    hero.p0 = plan.find((st) => st.kind === 'down').t1 / Tt;
-
-    const dro = $('#dro');
-    const f1 = (x) => clamp(x, 0, 999.9).toFixed(1).padStart(5, '0');
-    const setPen = (p, down, done) => {
-      pen.setAttribute('transform', `translate(${p.x} ${p.y})`);
-      ring.style.fillOpacity = down ? '1' : '0';
-      pen.style.opacity = done ? '0' : '1';
-      if (!dro) return;
-      if (done) { dro.textContent = 'PLOT COMPLETE'; return; }
-      const mmX = clamp(p.x, 0, PART_W);
-      const mmY = clamp(PART_H - p.y, 0, PART_H);
-      dro.textContent = `X ${f1(mmX)}  Y ${f1(mmY)}  ${down ? 'PEN DN' : 'PEN UP'}`;
-    };
-
-    hero.draw = (p) => {
-      const T = clamp(p, 0, 1) * Tt;
-      let cur = null;
-      plan.forEach((st) => {
-        if (st.kind === 'down') {
-          const k = T <= st.t0 ? 0 : T >= st.t1 ? 1 : (T - st.t0) / (st.t1 - st.t0);
-          if (k !== st.g.k) {
-            const g = st.g;
-            const was = g.k;
-            g.k = k;
-            if (k >= 1) { g.s.style.strokeDasharray = 'none'; g.s.style.strokeDashoffset = '0'; if (g.filled) g.s.style.fillOpacity = ''; }
-            else {
-              if (was >= 1) g.s.style.strokeDasharray = `${g.len} ${g.len}`;
-              g.s.style.strokeDashoffset = String(g.len * (1 - k));
-              if (g.filled) g.s.style.fillOpacity = '0';
-            }
-          }
-        }
-        if (T >= st.t0 && T < st.t1) cur = st;
-      });
-      const done = p >= 1;
-      texts.forEach((x) => { x.style.opacity = p >= 0.985 ? '1' : '0'; });
-      if (done) { setPen(pt(segs[segs.length - 1], segs[segs.length - 1].len), false, true); return; }
-      if (!cur) { setPen(pt(segs[0], 0), false, false); return; }
-      const k = (T - cur.t0) / (cur.t1 - cur.t0);
-      if (cur.kind === 'down') setPen(pt(cur.g, cur.g.len * k), true, false);
-      else {
-        const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-        setPen({ x: cur.from.x + (cur.to.x - cur.from.x) * e, y: cur.from.y + (cur.to.y - cur.from.y) * e }, false, false);
-      }
-    };
-    hero.ready = true;
-    hero.draw(0);
-
-    const deskPin = hasGsap() && mq('(min-width: 900px) and (prefers-reduced-motion: no-preference)').matches;
-    const target = deskPin ? hero.p0 : 1;
-    const dur = deskPin ? 1200 : 3000;
-    setTimeout(() => {
-      const t0 = performance.now();
-      const f = (now) => {
-        const k = Math.min(1, (now - t0) / dur);
-        hero.autoP = target * k;
-        applyHero();
-        if (k < 1) requestAnimationFrame(f);
-      };
-      requestAnimationFrame(f);
-    }, 250);
-  }
-
-  /* crosshair cursor over the hero drawing, fine pointers only */
-  function setupCrosshair() {
-    const frame = $('#sheet-frame');
-    const xh = $('#xhair');
-    const lab = $('#xhair-l');
-    if (!frame || !xh || !mq('(hover: hover) and (pointer: fine)').matches) return;
-    frame.addEventListener('pointerenter', () => frame.classList.add('xh-on'));
-    frame.addEventListener('pointerleave', () => frame.classList.remove('xh-on'));
-    frame.addEventListener('pointermove', (e) => {
-      const r = frame.getBoundingClientRect();
-      xh.style.transform = `translate(${e.clientX - r.left}px, ${e.clientY - r.top}px)`;
-      let mx, my;
-      const plot = $('#plot').getBoundingClientRect();
-      if (heroSvg && heroSvg.getScreenCTM) {
-        const p = heroSvg.createSVGPoint();
-        p.x = e.clientX; p.y = e.clientY;
-        const q = p.matrixTransform(heroSvg.getScreenCTM().inverse());
-        mx = q.x; my = PART_H - q.y;
-      } else {
-        mx = ((e.clientX - plot.left) / plot.width) * 234 - 10;
-        my = PART_H - (((e.clientY - plot.top) / plot.height) * 205 - 10);
-      }
-      lab.textContent = `X ${clamp(mx, 0, PART_W).toFixed(1)}  Y ${clamp(my, 0, PART_H).toFixed(1)}`;
-    });
-  }
-
   /* ---------- pen up / pen down pairs ---------- */
   function setPair(pair, up) {
     pair.style.setProperty('--up', String(up));
@@ -857,22 +788,76 @@
     });
   }
 
-  /* ---------- scroll layer: progress line, nav, grid parallax, machine tour ---------- */
-  const scrollState = { gridK: 0, tour: false };
+  /* ---------- tabs ---------- */
+  const scrollState = { tour: false, update: null };
+  const tabState = { cur: root.getAttribute('data-tab') || 'summary' };
+  const refreshST = () => { if (hasGsap()) window.ScrollTrigger.refresh(); };
+
+  function showTab(id, opts) {
+    if (!TABS.includes(id)) id = 'summary';
+    const o = opts || {};
+    tabState.cur = id;
+    root.setAttribute('data-tab', id);
+    $$('#tablist [role="tab"]').forEach((a) => {
+      const on = a.dataset.tab === id;
+      a.setAttribute('aria-selected', String(on));
+      a.setAttribute('tabindex', on ? '0' : '-1');
+      if (on && o.reveal !== false) {
+        const bar = $('#tablist');
+        bar.scrollLeft = Math.max(0, a.offsetLeft - (bar.clientWidth - a.offsetWidth) / 2);
+      }
+    });
+    if (o.push && location.hash !== `#${id}`) history.pushState(null, '', `#${id}`);
+    if (o.scroll !== false) window.scrollTo(0, 0);
+    if (o.focusPanel) { const p = document.getElementById(id); if (p) p.focus({ preventScroll: true }); }
+    requestAnimationFrame(() => { refreshST(); if (scrollState.update) scrollState.update(); heroResume(); });
+  }
+  const tabFromHash = () => {
+    const x = location.hash.slice(1);
+    return TABS.includes(x) ? x : null;
+  };
+
+  function setupTabs() {
+    const list = $('#tablist');
+    if (!list) return;
+    const tabs = $$('[role="tab"]', list);
+    tabs.forEach((a) => a.addEventListener('click', (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+      e.preventDefault();
+      showTab(a.dataset.tab, { push: true });
+    }));
+    list.addEventListener('keydown', (e) => {
+      const i = tabs.indexOf(document.activeElement);
+      if (i < 0) return;
+      let k = null;
+      if (e.key === 'ArrowRight') k = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft') k = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') k = 0;
+      else if (e.key === 'End') k = tabs.length - 1;
+      if (k === null) return;
+      e.preventDefault();
+      tabs[k].focus();
+      showTab(tabs[k].dataset.tab, { push: true });
+    });
+    $$('[data-tab-link]').forEach((a) => a.addEventListener('click', (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+      e.preventDefault();
+      showTab(a.getAttribute('href').slice(1), { push: true, focusPanel: true });
+    }));
+    const onNav = () => showTab(tabFromHash() || 'summary', { reveal: true });
+    window.addEventListener('popstate', onNav);
+    window.addEventListener('hashchange', () => { if (tabFromHash() && tabFromHash() !== tabState.cur) onNav(); });
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    showTab(tabFromHash() || 'summary', { scroll: false });
+  }
+
+  /* ---------- scroll layer: progress line, hero parallax, machine tour ---------- */
   function setupScroll() {
     const fill = $('#db-fill');
     const read = $('#db-read');
-    const toc = $('#toc');
-    const links = $$('#toc-list a').map((a) => ({
-      a, z: a.dataset.z, el: $(a.getAttribute('href')), label: a.childNodes[1] ? a.childNodes[1].textContent.trim() : '',
-    })).filter((l) => l.el);
-    const cur = $('#toc-cur');
-    const btn = $('#toc-btn');
-    const sum = $('#sum');
-    const fine = $('#bg-fine');
-    const coarse = $('#bg-coarse');
+    const heroBg = $('#hero-bg');
+    const heroEl = $('#top');
     let ticking = false;
-    let lastActive = null;
 
     const update = () => {
       ticking = false;
@@ -882,22 +867,10 @@
       const pct = clamp(y / max, 0, 1);
       if (fill) fill.style.transform = `scaleX(${pct})`;
       if (read) read.textContent = `Y ${(pct * 100).toFixed(1)}%`;
-
-      if (toc && sum) {
-        const show = sum.getBoundingClientRect().top < vh * 0.7;
-        toc.classList.toggle('show', show);
-        let active = null;
-        links.forEach((l) => { if (l.el.getBoundingClientRect().top <= vh * 0.4) active = l; });
-        if (active !== lastActive) {
-          lastActive = active;
-          links.forEach((l) => { l.a.classList.toggle('on', l === active); if (l === active) l.a.setAttribute('aria-current', 'location'); else l.a.removeAttribute('aria-current'); });
-          if (active && cur) cur.replaceChildren(h('b', null, active.z), ` ${active.label}`);
-        }
-      }
-
-      if (scrollState.gridK) {
-        if (fine) fine.style.transform = `translate3d(0, ${-((y * 0.15 * scrollState.gridK) % 24)}px, 0)`;
-        if (coarse) coarse.style.transform = `translate3d(0, ${-((y * 0.3 * scrollState.gridK) % 120)}px, 0)`;
+      /* parallax applies to the hero only: the model layer moves at about half the scroll speed */
+      if (heroBg && heroEl && !reduce) {
+        const hh = heroEl.offsetHeight;
+        heroBg.style.transform = tabState.cur === 'summary' ? `translate3d(0, ${Math.round(clamp(y, 0, hh) * 0.5)}px, 0)` : '';
       }
       if (scrollState.tour) updateTour(vh);
     };
@@ -905,33 +878,13 @@
     window.addEventListener('scroll', req, { passive: true });
     window.addEventListener('resize', req);
     scrollState.update = update;
-
-    const setGrid = () => {
-      scrollState.gridK = mq('(prefers-reduced-motion: reduce)').matches ? 0 : mq('(min-width: 900px)').matches ? 1 : 0.5;
-      if (!scrollState.gridK) { if (fine) fine.style.transform = ''; if (coarse) coarse.style.transform = ''; }
-      req();
-    };
-    [mq('(prefers-reduced-motion: reduce)'), mq('(min-width: 900px)')].forEach((m) => m.addEventListener('change', setGrid));
-    setGrid();
-
-    /* phone nav: current zone plus a button that opens the list */
-    if (btn && toc) {
-      const close = () => { toc.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
-      btn.addEventListener('click', () => {
-        const open = toc.classList.toggle('open');
-        btn.setAttribute('aria-expanded', String(open));
-      });
-      $$('#toc-list a').forEach((a) => a.addEventListener('click', close));
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-      document.addEventListener('click', (e) => { if (!toc.contains(e.target)) close(); });
-    }
     update();
   }
 
   /* machine tour: sticky frame on the left swaps as the steps scroll past */
   function updateTour(vh) {
     const steps = $$('.tour-step');
-    if (!steps.length) return;
+    if (!steps.length || tabState.cur !== 'machine') return;
     const line = vh * 0.5;
     let active = 0;
     steps.forEach((st, i) => { if (st.getBoundingClientRect().top <= line) active = i; });
@@ -951,10 +904,38 @@
       root.classList.toggle('tour-on', m.matches);
       $$('.tour-step').forEach((st) => { if (!m.matches) st.classList.remove('is-active'); });
       if (scrollState.update) scrollState.update();
-      if (hasGsap()) window.ScrollTrigger.refresh();
+      refreshST();
     };
     m.addEventListener('change', apply);
     apply();
+  }
+
+
+  /* ---------- reveals: headings draw their dimension line, blocks rise in, cost bars grow ----------
+     IntersectionObserver fires when a tab panel becomes visible, so this works across tab switches.
+     Reduced motion or no IntersectionObserver: nothing is set, everything stays in its final state. */
+  function setupReveals() {
+    if (reduce || !('IntersectionObserver' in window)) return;
+    root.classList.add('motion');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('in');
+        io.unobserve(en.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    const watch = (el, delay) => {
+      el.classList.add('rv');
+      if (delay) el.style.transitionDelay = `${delay}s`;
+      io.observe(el);
+    };
+    $$('.sec-head').forEach((h) => { h.classList.add('dl-anim'); io.observe(h); });
+    $$('[data-reveal]').forEach((el) => watch(el, 0));
+    [['#notes tbody tr', 0.14], ['#cards .card', 0.15], ['#done-tiles .dtile', 0.1]].forEach(([sel, st]) => {
+      $$(sel).forEach((el, i) => watch(el, i * st));
+    });
+    const bars = $('#bars');
+    if (bars) { bars.classList.add('bars-anim'); io.observe(bars); }
   }
 
   /* ---------- GSAP motion, opted into per media query ---------- */
@@ -970,60 +951,12 @@
     }, (ctx) => {
       const { desk, mob } = ctx.conditions;
       if (!desk && !mob) return undefined; // reduced motion: everything stays in its final state
-      const k = desk ? 1 : 0.5;
       const topPin = BAR + TOC + 16;
       const added = [];
       const mark = (el, cls) => { el.classList.add(cls); added.push([el, cls]); };
 
-      /* hero */
-      const heroEl = $('#top');
-      if (desk) {
-        ScrollTrigger.create({
-          trigger: heroEl, start: 'top top', end: '+=150%', pin: true, anticipatePin: 1,
-          onUpdate: (self) => { hero.scrubP = hero.p0 + self.progress * (1 - hero.p0); applyHero(); },
-        });
-        gsap.timeline({ scrollTrigger: { trigger: heroEl, start: 'top top', end: '+=150%', scrub: true } })
-          .to('#hero-copy', { y: -70, opacity: 0.6, ease: 'none' }, 0)
-          .to('#hero-ghost', { yPercent: -12, ease: 'none' }, 0);
-      } else {
-        gsap.to('#hero-copy', { y: -30, opacity: 0.8, ease: 'none', scrollTrigger: { trigger: heroEl, start: 'top top', end: 'bottom top', scrub: true } });
-        gsap.to('#hero-ghost', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: heroEl, start: 'top top', end: 'bottom top', scrub: true } });
-      }
-
-      /* section headings: the dimension line draws in, end tick last */
-      $$('.sec-head').forEach((head) => {
-        const line = $('.dl-line', head);
-        const end = $('.dl-end', head);
-        const tl = gsap.timeline({ scrollTrigger: { trigger: head, start: 'top 88%', once: true } });
-        tl.fromTo(line, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.9, ease: 'power2.out' });
-        tl.fromTo(end, { scaleY: 0 }, { scaleY: 1, duration: 0.25, ease: 'power1.out' }, '>-0.05');
-      });
-
-      /* reveals: never from opacity 0 */
-      $$('[data-reveal]').forEach((el) => {
-        gsap.from(el, { opacity: 0.4, y: 16, duration: 0.7, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 92%', once: true } });
-      });
-      const group = (sel, trig, stagger) => {
-        const els = $$(sel);
-        if (els.length) gsap.from(els, { opacity: 0.4, y: 16, duration: 0.6, stagger, ease: 'power2.out', scrollTrigger: { trigger: trig || els[0], start: 'top 85%', once: true } });
-      };
-      group('#notes tbody tr', '#notes', 0.14);
-      group('#cards .card', '#cards', 0.15);
-      group('#done-tiles .dtile', '#done-tiles', 0.1);
-      group('#signblock .sb-row', '#signblock', 0.1);
-
-      /* section ghost letters drift against the content */
-      $$('.sec .ghost').forEach((g) => {
-        const sec = g.closest('.sec');
-        gsap.fromTo(g, { yPercent: -30 * k }, { yPercent: 30 * k, ease: 'none', scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true } });
-      });
-
-      /* render band */
-      const band = $('#band');
-      const bimg = $('#band-img');
-      if (band && bimg) {
-        gsap.fromTo(bimg, { scale: 1.15, yPercent: -10 * k }, { scale: 1.15, yPercent: 10 * k, ease: 'none', scrollTrigger: { trigger: band, start: 'top bottom', end: 'bottom top', scrub: true } });
-      }
+      /* headings, reveals and cost bars run on IntersectionObserver (setupReveals), not here:
+         ScrollTriggers made inside hidden tab panels never played */
 
       /* stage staircase: pinned, one step per slice of scroll */
       const stairEl = $('#stair');
@@ -1055,17 +988,6 @@
         });
       }
 
-      /* cost bars grow to scale */
-      const fills = $$('#bars .bar-row:not(.na) .bar-fill');
-      if (fills.length) {
-        /* grow once, never scrubbed: a to-scale chart must not sit at a wrong length mid-scroll */
-        gsap.fromTo(fills, { scaleX: 0.06 }, { scaleX: 1, duration: 1.1, ease: 'power2.out', scrollTrigger: { trigger: '#bars', start: 'top 90%', once: true } });
-      }
-
-      /* ticks draw in */
-      const paths = $$('#checklist .ck path');
-      if (paths.length) gsap.from(paths, { strokeDashoffset: 1, duration: 0.5, stagger: 0.25, ease: 'power1.out', scrollTrigger: { trigger: '#checklist', start: 'top 88%', once: true } });
-
       ScrollTrigger.sort();
       requestAnimationFrame(() => ScrollTrigger.refresh());
 
@@ -1073,65 +995,171 @@
         added.forEach(([el, cls]) => el.classList.remove(cls));
         stair.pinned = false;
         drawStair();
-        $$('.dl-line, .dl-end', document).forEach((el) => { el.style.clipPath = ''; el.style.transform = ''; });
       };
     });
   }
 
-  /* ---------- 3D model, loaded only on request ---------- */
-  function setupViewer() {
+  /* ---------- 3D: one loader, one lighting rig, used by the hero and the viewer ---------- */
+  const three = { lib: null, model: null, explode: null };
+  const loadScript = (src) => new Promise((ok, bad) => {
+    const sc = document.createElement('script');
+    sc.src = src; sc.onload = ok; sc.onerror = () => bad(new Error(src));
+    document.head.appendChild(sc);
+  });
+  function loadThree() {
+    if (!three.lib) {
+      three.lib = (async () => {
+        if (!window.THREE) {
+          await loadScript('https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js');
+          await loadScript('https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js');
+          await loadScript('https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js');
+        }
+        return window.THREE;
+      })();
+      three.lib.catch(() => { three.lib = null; });
+    }
+    return three.lib;
+  }
+  function loadModel() {
+    if (!three.model) {
+      three.model = loadThree().then((T) => new Promise((ok, bad) => {
+        new T.GLTFLoader().load('assets/model.json', (g) => {
+          /* The glTF materials carry no metallic factor, so they load fully metallic and render black without an
+             environment map. Matte them down so aluminum reads light gray, the bed blue, printed parts orange. */
+          g.scene.traverse((o) => {
+            if (!o.isMesh) return;
+            const ms = Array.isArray(o.material) ? o.material : [o.material];
+            ms.forEach((m) => { m.side = T.DoubleSide; if ('metalness' in m) { m.metalness = 0.12; m.roughness = 0.58; } });
+          });
+          ok(g);
+        }, undefined, bad);
+      }));
+      three.model.catch(() => { three.model = null; });
+    }
+    return three.model;
+  }
+
+  function makeStage(T, cv, gltf, o) {
+    const sizeOf = () => {
+      const p = cv.parentElement;
+      const w = Math.max(1, p.clientWidth);
+      return [w, o.fill ? Math.max(1, p.clientHeight) : Math.round(w * 10 / 16)];
+    };
+    let [w, hgt] = sizeOf();
+    const r = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: !!o.alpha });
+    r.outputEncoding = T.sRGBEncoding;
+    r.toneMapping = T.ACESFilmicToneMapping;
+    r.toneMappingExposure = 1.2;
+    r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    r.setSize(w, hgt, false);
+    if (o.alpha) r.setClearColor(0x000000, 0);
+    const sc = new T.Scene();
+    if (!o.alpha) sc.background = new T.Color('#eef1f4');
+    /* Lighting: hemisphere fill, key from front-top-left, weaker fill from the back-right. */
+    sc.add(new T.HemisphereLight(0xffffff, 0x8c8478, 0.9));
+    const key = new T.DirectionalLight(0xffffff, 1.6);
+    key.position.set(-1800, 3200, 2600);
+    sc.add(key);
+    const fillL = new T.DirectionalLight(0xffffff, 0.6);
+    fillL.position.set(2200, 1400, -2600);
+    sc.add(fillL);
+    const model = gltf.scene.clone(true);
+    sc.add(model);
+    const cam = new T.PerspectiveCamera(30, w / hgt, 5, 20000);
+    cam.position.set(2300, 2000, 2700);
+    const c = new T.OrbitControls(cam, cv);
+    c.target.set(0, 0, 50);
+    c.enableDamping = true;
+    c.enableZoom = false; // wheel zoom only with Ctrl or when the canvas is focused, so the page still scrolls
+    cv.style.touchAction = o.touch || 'none';
+    cv.addEventListener('wheel', (e) => { c.enableZoom = e.ctrlKey || document.activeElement === cv; }, { capture: true, passive: true });
+    const applySize = () => {
+      [w, hgt] = sizeOf();
+      r.setSize(w, hgt, false);
+      cam.aspect = w / hgt;
+      if (o.shift && window.innerWidth >= 900) cam.setViewOffset(w, hgt, -w * o.shift, 0, w, hgt);
+      else cam.clearViewOffset();
+      cam.updateProjectionMatrix();
+    };
+    applySize();
+    window.addEventListener('resize', applySize);
+    c.update();
+    return { T, r, sc, cam, c, model, applySize, render: () => { c.update(); r.render(sc, cam); } };
+  }
+
+  /* hero: the model is the background layer */
+  const heroState = { stage: null, visible: false, raf: 0 };
+  function heroLoop() {
+    heroState.raf = 0;
+    if (!heroState.stage || !heroState.visible || document.hidden) return;
+    heroState.stage.render();
+    heroState.raf = requestAnimationFrame(heroLoop);
+  }
+  function heroResume() {
+    if (!heroState.stage) return;
+    const el = $('#top');
+    heroState.visible = tabState.cur === 'summary' && !!el && el.getBoundingClientRect().bottom > 0;
+    if (heroState.visible && !heroState.raf) { heroState.stage.applySize(); heroState.raf = requestAnimationFrame(heroLoop); }
+  }
+  async function setupHero3D() {
+    const cv = $('#hero-3d');
+    const hero = $('#top');
+    if (!cv || !hero) return;
+    try {
+      const probe = document.createElement('canvas');
+      if (!(probe.getContext('webgl2') || probe.getContext('webgl'))) return;
+      const [T, g] = await Promise.all([loadThree(), loadModel()]);
+      cv.hidden = false;
+      const st = makeStage(T, cv, g, { alpha: true, fill: true, shift: 0.17, touch: 'pan-y' });
+      st.c.autoRotate = !reduce;
+      st.c.autoRotateSpeed = 0.8;
+      st.c.addEventListener('start', () => { st.c.autoRotate = false; });
+      heroState.stage = st;
+      st.render();
+      hero.classList.add('live');
+      window.addEventListener('scroll', heroResume, { passive: true });
+      document.addEventListener('visibilitychange', heroResume);
+      heroResume();
+    } catch (e) {
+      cv.hidden = true; // the poster render stays as the background
+    }
+  }
+
+  /* viewer in the Machine tab, with the explode slider */
+  function setupViewer(data) {
     const btn = $('#open3d');
     const cv = $('#viewer');
     const st = $('#vstate');
     if (!btn || !cv || !st) return;
-    const load = (src) => new Promise((ok, bad) => {
-      const sc = document.createElement('script');
-      sc.src = src; sc.onload = ok; sc.onerror = () => bad(new Error(src));
-      document.head.appendChild(sc);
-    });
     btn.addEventListener('click', async () => {
       btn.disabled = true;
       st.textContent = 'Loading the 3D model. It is a large file, so this can take a few seconds.';
       try {
-        if (!window.THREE) {
-          await load('https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js');
-          await load('https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js');
-          await load('https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js');
+        const [T, g] = await Promise.all([loadThree(), loadModel()]);
+        cv.hidden = false;
+        const s = makeStage(T, cv, g, { alpha: false, touch: 'none' });
+        s.applySize();
+        st.textContent = 'Drag to orbit, hold Ctrl and scroll (or click the model first) to zoom, right-drag to pan.';
+        btn.hidden = true;
+        refreshST();
+        const ex = data && data.explode && typeof data.explode === 'object' ? data.explode : null;
+        const ctl = $('#explode-ctl');
+        if (ex && ctl) {
+          const items = Object.entries(ex).map(([name, vec]) => {
+            const o = s.model.getObjectByName(name);
+            return o && Array.isArray(vec) && vec.length === 3 ? { o, base: o.position.clone(), vec } : null;
+          }).filter(Boolean);
+          if (items.length) {
+            const slider = $('#explode');
+            const apply = () => {
+              const k = parseFloat(slider.value) || 0;
+              items.forEach(({ o, base, vec }) => o.position.set(base.x + vec[0] * k, base.y + vec[1] * k, base.z + vec[2] * k));
+            };
+            slider.addEventListener('input', apply);
+            ctl.hidden = false;
+          }
         }
-        const T = window.THREE;
-        const size = () => { const w = cv.parentElement.clientWidth; return [w, Math.round(w * 10 / 16)]; };
-        let [w, hgt] = size();
-        const r = new T.WebGLRenderer({ canvas: cv, antialias: true });
-        r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-        r.setSize(w, hgt, false);
-        const sc = new T.Scene();
-        sc.background = new T.Color('#eef1f4');
-        sc.add(new T.HemisphereLight(0xffffff, 0x667788, 1.5));
-        const dl = new T.DirectionalLight(0xffffff, 1.4);
-        dl.position.set(1500, 3000, 2200);
-        sc.add(dl);
-        const cam = new T.PerspectiveCamera(30, w / hgt, 5, 20000);
-        cam.position.set(2300, 2000, 2700);
-        const c = new T.OrbitControls(cam, cv);
-        c.target.set(0, 0, 50);
-        c.enableDamping = true;
-        c.update();
-        new T.GLTFLoader().load('assets/model.json', (g) => {
-          g.scene.traverse((o) => { if (o.isMesh) o.material.side = T.DoubleSide; });
-          sc.add(g.scene);
-          cv.hidden = false;
-          [w, hgt] = size(); r.setSize(w, hgt, false); cam.aspect = w / hgt; cam.updateProjectionMatrix();
-          st.textContent = 'Drag to orbit, scroll to zoom, right-drag to pan.';
-          btn.hidden = true;
-          if (hasGsap()) window.ScrollTrigger.refresh();
-          window.addEventListener('resize', () => {
-            [w, hgt] = size(); r.setSize(w, hgt, false); cam.aspect = w / hgt; cam.updateProjectionMatrix();
-          });
-          (function loop() { c.update(); r.render(sc, cam); requestAnimationFrame(loop); })();
-        }, undefined, () => {
-          st.textContent = 'The 3D model could not load here. The renders above show the same assembly.';
-          btn.disabled = false;
-        });
+        (function loop() { s.render(); requestAnimationFrame(loop); })();
       } catch (e) {
         st.textContent = 'The 3D viewer could not load here. The renders above show the same assembly.';
         btn.disabled = false;
@@ -1142,26 +1170,28 @@
   /* ---------- boot ---------- */
   async function main() {
     guardImages();
-    setupViewer();
     setupPairs();
     setupScroll();
+    setupTabs();
     setupTourMode();
-    setupCrosshair();
-    plotHero();
+    const idle = window.requestIdleCallback || ((f) => setTimeout(f, 400));
+    idle(() => setupHero3D());
     const { data, missing } = await loadData();
+    setupViewer(data);
     const v = derive(data);
     fillBindings(v);
-    const steps = [renderNotes, renderStairs, renderDone, () => renderCards(data, v), renderBars, () => renderOthers(data),
-      () => renderShop(data), renderSpecs, () => renderSheet(data, v), renderChecks, renderSign];
+    const steps = [renderNotes, renderSpecs, renderStairs, renderDone, () => renderCards(data, v), renderBars, () => renderOthers(data),
+      () => renderMade(data.parts), () => renderPrograms(data), () => renderSheet(data, v), () => renderExploded(data.exploded)];
     steps.forEach((fn) => { try { fn(v); } catch (e) { console.error(e); } });
     if (missing.length) {
       $('#draft-list').textContent = missing.map((m) => `${m}.json`).join(', ');
       $('#draft').hidden = false;
     }
     setupCounts();
+    setupReveals();
     initMotion();
     if (scrollState.update) scrollState.update();
-    const refresh = () => { if (hasGsap()) window.ScrollTrigger.refresh(); if (scrollState.update) scrollState.update(); };
+    const refresh = () => { refreshST(); if (scrollState.update) scrollState.update(); };
     if (document.readyState === 'complete') refresh(); else window.addEventListener('load', refresh);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
     let t = null;
