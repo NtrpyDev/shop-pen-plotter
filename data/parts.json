@@ -1,0 +1,309 @@
+[
+ {
+  "part": "Gantry end plate",
+  "kind": "machined",
+  "qty": 2,
+  "size_in": "7.874 x 6.890 x 0.250",
+  "material": "6061-T651 aluminum plate, 5/16 in, faced to .2500",
+  "programs": [
+   "O60011",
+   "O60012"
+  ],
+  "est_time_each": "7.9 min machine (est.)",
+  "filament_g": null,
+  "notes": "Bolts to each end of the gantry beam and sits on two Y carriages."
+ },
+ {
+  "part": "Pen carriage plate",
+  "kind": "machined",
+  "qty": 1,
+  "size_in": "3.976 x 3.543 x 0.250",
+  "material": "6061-T651 aluminum plate, 5/16 in, faced to .2500",
+  "programs": [
+   "O60021",
+   "O60022"
+  ],
+  "est_time_each": "4.9 min machine (est.)",
+  "filament_g": null,
+  "notes": "Bolts to the two X carriages. Carries the pen-lift rail, servo bracket and dock stop."
+ },
+ {
+  "part": "Pen dock",
+  "kind": "machined",
+  "qty": 1,
+  "size_in": "2.126 x 1.772 x 0.250",
+  "material": "6061-T651 aluminum plate, 1/4 in",
+  "programs": [
+   "O60031"
+  ],
+  "est_time_each": "4.1 min machine (est.)",
+  "filament_g": null,
+  "notes": "Rides the pen-lift slide. Two pressed-in dowels locate the quick-change pen tool."
+ },
+ {
+  "part": "X motor and idler plate",
+  "kind": "machined",
+  "qty": 2,
+  "size_in": "5.079 x 2.047 x 0.250",
+  "material": "6061-T651 aluminum plate, 1/4 in",
+  "programs": [
+   "O60051"
+  ],
+  "est_time_each": "7.9 min machine (est.)",
+  "filament_g": null,
+  "notes": "Same part at both ends of the beam top: the right one carries the X motor, the left one is flipped and carries the X idler."
+ },
+ {
+  "part": "X belt clamp bar",
+  "kind": "machined",
+  "qty": 2,
+  "size_in": "1.024 x 0.787 x 0.250",
+  "material": "6061-T651 aluminum plate, 1/4 in",
+  "programs": [
+   "O60061"
+  ],
+  "est_time_each": "0.3 min machine (est.)",
+  "filament_g": null,
+  "notes": "Clamps the X belt to the front of the pen carriage."
+ },
+ {
+  "part": "Y belt clamp bar",
+  "kind": "machined",
+  "qty": 2,
+  "size_in": "3.543 x 1.181 x 0.250",
+  "material": "6061-T651 aluminum plate, 1/4 in",
+  "programs": [
+   "O60071"
+  ],
+  "est_time_each": "0.5 min machine (est.)",
+  "filament_g": null,
+  "notes": "Clamps the Y belt end to the gantry end plate."
+ },
+ {
+  "part": "Y motor and idler bracket A",
+  "kind": "machined",
+  "qty": 2,
+  "size_in": "4.331 x 4.000 x 2.953",
+  "material": "6061-T6 aluminum angle, 4 x 4 x 1/4 in, sawn 4.3307 in long",
+  "programs": [
+   "O60081",
+   "O60082"
+  ],
+  "est_time_each": "2.4 min machine (est.)",
+  "filament_g": null,
+  "notes": "Bolts to a frame end and carries a Y motor or a Y idler carrier. Two operations. Bracket B is its mirror image."
+ },
+ {
+  "part": "Y motor and idler bracket B",
+  "kind": "machined",
+  "qty": 2,
+  "size_in": "4.331 x 4.000 x 2.953",
+  "material": "6061-T6 aluminum angle, 4 x 4 x 1/4 in, sawn 4.3307 in long",
+  "programs": [
+   "O60091",
+   "O60092"
+  ],
+  "est_time_each": "2.4 min machine (est.)",
+  "filament_g": null,
+  "notes": "Mirror image of bracket A. Two operations."
+ },
+ {
+  "part": "Y idler carrier",
+  "kind": "machined",
+  "qty": 2,
+  "size_in": "1.575 x 1.575 x 0.250",
+  "material": "6061-T651 aluminum plate, 1/4 in",
+  "programs": [
+   "O60101"
+  ],
+  "est_time_each": "0.4 min machine (est.)",
+  "filament_g": null,
+  "notes": "Sits on a front Y bracket. The Y idler axle threads into its M5 tap and a jack screw sets the belt tension."
+ },
+ {
+  "part": "X belt tension block",
+  "kind": "machined",
+  "qty": 1,
+  "size_in": "1.000 x 0.787 x 0.709",
+  "material": "6061-T6511 aluminum bar, 1 x 1 in, sawn 0.7874 in long, one side faced to .7087",
+  "programs": [
+   "O60111",
+   "O60112"
+  ],
+  "est_time_each": "1.7 min machine (est.)",
+  "filament_g": null,
+  "notes": "Sits on the left (idler) plate. Its screw sets the X belt tension. Two operations."
+ },
+ {
+  "part": "Paper corner stop bar",
+  "kind": "machined",
+  "qty": 2,
+  "size_in": "11.811 x 0.750 x 0.250",
+  "material": "6061-T651 aluminum plate, 1/4 in, sawn strip 11.8110 x 0.8125 in, edge faced to .7500",
+  "programs": [
+   "O60121",
+   "O60122"
+  ],
+  "est_time_each": "1.2 min machine (est.)",
+  "filament_g": null,
+  "notes": "Screwed along the front and left bed edges so the inside corner is the paper origin."
+ },
+ {
+  "part": "X belt spacer",
+  "kind": "machined",
+  "qty": 2,
+  "size_in": "1.024 x 0.787 x 0.250",
+  "material": "6061-T651 aluminum plate, 1/4 in",
+  "programs": [
+   "O60131"
+  ],
+  "est_time_each": "0.3 min machine (est.)",
+  "filament_g": null,
+  "notes": "Goes under each X belt clamp bar so the belt clears the pulley flanges. Same holes as the clamp bar."
+ },
+ {
+  "part": "X idler carrier",
+  "kind": "machined",
+  "qty": 1,
+  "size_in": "1.575 x 1.575 x 0.250",
+  "material": "6061-T651 aluminum plate, 1/4 in",
+  "programs": [
+   "O60141"
+  ],
+  "est_time_each": "1.4 min machine (est.)",
+  "filament_g": null,
+  "notes": "Sits on top of the left X plate on four M3x12 bolts. The X idler axle threads into its M5 tap."
+ },
+ {
+  "part": "Servo bracket",
+  "kind": "printed",
+  "qty": 1,
+  "size_in": "2.585 x 0.748 x 0.728",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "21 min print (est.)",
+  "filament_g": 5.3,
+  "notes": "Holds the pen-lift servo on the pen carriage. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "X cable chain bracket",
+  "kind": "printed",
+  "qty": 1,
+  "size_in": "3.920 x 2.047 x 0.709",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "36 min print (est.)",
+  "filament_g": 13.1,
+  "notes": "Carries the moving end of the X cable chain under the top X clamp screws. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "X limit switch bracket",
+  "kind": "printed",
+  "qty": 1,
+  "size_in": "1.811 x 0.630 x 0.591",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "17 min print (est.)",
+  "filament_g": 4.9,
+  "notes": "Holds the X home switch under the left end of the beam. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "Y limit switch bracket, right",
+  "kind": "printed",
+  "qty": 1,
+  "size_in": "1.260 x 0.614 x 0.512",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "17 min print (est.)",
+  "filament_g": 3.9,
+  "notes": "Holds the right Y home switch at the front of the right side member. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "Y limit switch bracket, left",
+  "kind": "printed",
+  "qty": 1,
+  "size_in": "1.260 x 0.614 x 0.512",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "17 min print (est.)",
+  "filament_g": 3.9,
+  "notes": "Holds the left Y home switch. Mirror image of the right one. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "Pen tool",
+  "kind": "printed",
+  "qty": 3,
+  "size_in": "1.969 x 1.417 x 0.630",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "59 min print (est.)",
+  "filament_g": 21.1,
+  "notes": "Quick-change pen holder with a 90 degree V, two magnets and four M3 heat-set inserts. Print back face down. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "Pen strap",
+  "kind": "printed",
+  "qty": 6,
+  "size_in": "1.575 x 0.394 x 0.197",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "8 min print (est.)",
+  "filament_g": 2.0,
+  "notes": "Clamps the pen into the V. Two per pen tool. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "Lift tab",
+  "kind": "printed",
+  "qty": 1,
+  "size_in": "1.339 x 1.154 x 0.472",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "26 min print (est.)",
+  "filament_g": 4.3,
+  "notes": "Bolts to the pen dock. Ledge for the servo horn and a boss for the optional weight slugs. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "Dock stop",
+  "kind": "printed",
+  "qty": 1,
+  "size_in": "0.551 x 0.537 x 0.472",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "8 min print (est.)",
+  "filament_g": 1.0,
+  "notes": "Stops the dock 0.3150 in down when no pen tool is fitted. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "Y idler spacer",
+  "kind": "printed",
+  "qty": 2,
+  "size_in": "0.384 x 0.354 x 0.354",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "6 min print (est.)",
+  "filament_g": 0.6,
+  "notes": "Tube under each Y idler, from the bracket bore to the carrier. Print upright. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "X idler spacer",
+  "kind": "printed",
+  "qty": 1,
+  "size_in": "0.486 x 0.354 x 0.354",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "7 min print (est.)",
+  "filament_g": 0.7,
+  "notes": "Tube over the X idler, up through the idler plate to the X idler carrier. Print upright. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ },
+ {
+  "part": "Pen set block",
+  "kind": "printed",
+  "qty": 1,
+  "size_in": "1.392 x 0.787 x 0.787",
+  "material": "PETG",
+  "programs": [],
+  "est_time_each": "25 min print (est.)",
+  "filament_g": 10.7,
+  "notes": "Gauge block that sets the pen tip 1.3917 in below the tool while you clamp the pen. Sliced alone in PrusaSlicer 2.8.1 with the stock Original Prusa MK4 Input Shaper 0.4 nozzle printer profile, 0.20mm STRUCTURAL print profile and Generic PETG filament profile, set to 4 perimeters and 40% infill, no supports, largest flat face on the bed. Time and grams are the slicer's estimate for the whole file, including the purge line."
+ }
+]
