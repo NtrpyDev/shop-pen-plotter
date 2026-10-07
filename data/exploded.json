@@ -6,7 +6,7 @@
   "parts": [
    {
     "n": 1,
-    "name": "2040 aluminum extrusion, 64.96 in (side member)",
+    "name": "2040 aluminum extrusion, 65 in (side member)",
     "qty": 2,
     "kind": "bought"
    },
@@ -528,7 +528,7 @@
   "parts": [
    {
     "n": 1,
-    "name": "3/4 in MDF bed, 40.39 x 62.99 in",
+    "name": "3/4 in MDF bed, 40.375 x 63 in",
     "qty": 1,
     "kind": "bought"
    },
