@@ -1,9 +1,9 @@
 {
- "total": 1950.04,
+ "total": 1846.04,
  "currency": "USD",
  "date": "2026-10-06",
  "accuracy_expectation": "Not measured, and the parts that decide it are unverified. The recommended build targets +/-0.0079 in with Hiwin rails and Gates belt. Here the MGN15 rails are Chinese clones with no stated precision grade (TEN-HIGH says its blocks are pre-loaded; Coavoo states nothing), and the belt is a generic GT2. No measured straightness or block-play data for clone MGN15 rails was found; forum reports are anecdotal and describe a QC lottery. Estimate only: if the rails arrive straight and the blocks have no play, the closed-loop motors and calibration should keep it near the recommended build; a bad rail or loose block would not, and the only way to know is to check the rails with an indicator on arrival.",
- "summary": "The same machine as the recommended build, line for line, with each part bought as the cheapest China-made equivalent. Most parts ship from China (AliExpress, Banggood, LCSC) or from China-based sellers on Amazon. Long or heavy items (extrusion, MDF, steel sheet, aluminum stock) come from US sources. The total includes shipping where the listing showed it, but not import duty or sales tax. 27 of the 57 lines are provisional: the exact variant or its shipping still has to be confirmed at checkout.",
+ "summary": "The same machine as the recommended build, line for line, with each part bought as the cheapest China-made equivalent. Most parts ship from China (AliExpress, Banggood, LCSC) or from China-based sellers on Amazon. Long or heavy items (extrusion, MDF, steel sheet, aluminum stock) come from US sources. Prices are for the parts only: shipping, import duty and sales tax are not included. 27 of the 57 lines are provisional: the exact variant still has to be confirmed at checkout.",
  "tradeoffs": [
   "Rails: Chinese clone MGN15 rails, one piece per rail, from Shenzhen sellers on Amazon US (Coavoo 63.78 in for Y, TEN-HIGH 43.31 in for X). Neither states a precision grade, and the blocks only fit their own rails.",
   "Belt and pulleys are generic GT2, not Gates, so steps per inch are calibrated on a long test plot.",
@@ -23,12 +23,12 @@
  "groups": [
   [
    "Motion",
-   977.22,
+   916.07,
    "Clone MGN15 rails with blocks fitted and generic GT2 belt and idlers (Amazon US, China-based sellers), clone MGN9 and pulleys (AliExpress), StepperOnline closed-loop kits, GDW servo, KST horn"
   ],
   [
    "Frame & fasteners",
-   304.3,
+   292.02,
    "2040 (Amazon) and 4080 (MISUMI USA) extrusion, T-nuts, stainless screws, dowels, inserts and magnets from AliExpress and Amazon China-based sellers"
   ],
   [
@@ -38,7 +38,7 @@
   ],
   [
    "Electronics",
-   219.47,
+   188.9,
    "ESP32 FluidNC board, Mean Well 24 V supply, XKB switches, drag chains, cable, enclosure, E-stop, buck, connectors and ferrules (AliExpress, LCSC, Banggood, Amazon)"
   ],
   [
@@ -54,11 +54,11 @@
    "spec": "Coavoo \"MGN15 Linear Rail 1620mm 63.78\" 2PCS MGN15 ... + 4PCS MGN15H\" (ASIN B0C241TYRR): 2 rails, 63.78 in (1620 mm part length), with 4 MGN15H blocks fitted",
    "qty": 2.0,
    "unit": 433.15,
-   "ext": 463.22,
+   "ext": 433.15,
    "vendor": "Coavoo Transmission (Amazon.com third-party seller, Shenzhen CN business address)",
    "url": "https://www.amazon.com/dp/B0C241TYRR",
    "status": "confirmed",
-   "notes": "Chinese clone, one piece per rail, bought on Amazon US from a Shenzhen seller. One pack ($433.15) holds both Y rails and their 4 blocks; delivery $30.07; total $463.22. Exact CAD length (Y_RAIL_LEN), so a drop-in. Seller states no precision grade or preload, only \"high precision\". Ships-from location is not stated; Oct 20-30 delivery suggests China. Cheaper than two 1-rail + 2-block packs (B0C243WMZC, $276.83 + $20.04 each). eBay had no clone MGN15 longer than 39.37 in. Import: Amazon US listing: price shown with no import line; no duty is added at Amazon checkout for this seller-fulfilled item as far as the page shows (checkout not viewed, no login)."
+   "notes": "Chinese clone, one piece per rail, bought on Amazon US from a Shenzhen seller. One pack ($433.15) holds both Y rails and their 4 blocks; delivery $30.07; total $463.22. Exact CAD length (Y_RAIL_LEN), so a drop-in. Seller states no precision grade or preload, only \"high precision\". Ships-from location is not stated; Oct 20-30 delivery suggests China. Cheaper than two 1-rail + 2-block packs (B0C243WMZC, $276.83 + $20.04 each). eBay had no clone MGN15 longer than 39.37 in. Import: Amazon US listing: price shown with no import line; no duty is added at Amazon checkout for this seller-fulfilled item as far as the page shows (checkout not viewed, no login). Shipping of $30.07 not included."
   },
   {
    "group": "Motion",
@@ -66,11 +66,11 @@
    "spec": "TEN-HIGH \"MGN15 1100mm ... 2pcs Rails + 2pcs MGN15H Block Bearings (Longer Block)\" (ASIN B06Y4N7T2G): 2 rails, 43.31 in (1100 mm part length), with 2 MGN15H fitted",
    "qty": 2.0,
    "unit": 261.31,
-   "ext": 271.31,
+   "ext": 261.31,
    "vendor": "Ten-high Electronics & Machine (Amazon.com third-party seller, Shenzhen CN business address)",
    "url": "https://www.amazon.com/dp/B06Y4N7T2G",
    "status": "confirmed",
-   "notes": "Chinese clone, one piece per rail, bought on Amazon US from a Shenzhen seller. Pack $261.31 + $10.00 delivery = $271.31. Seller states rail hole pitch 1.575 in, M3x10 rail bolts, MGN15H block 2.315 x 1.260 in, \"pre-loaded\"; no precision grade. Rejected: FSYGUTOU B0H8ZK7SSR at $130.59 per rail (seller has 2 ratings, 50% positive), XIA ZEWANG B0FDQGFHLX $162.50 per rail, Coavoo 2-pack B0D7CLBKD5 $309.22. An AliExpress one-piece rail of this length that ships to the US was not checked because of the IP block (candidates 3256808135010660, 3256813031237735). Import: Amazon US listing: price shown with no import line; no duty is added at Amazon checkout for this seller-fulfilled item as far as the page shows (checkout not viewed, no login)."
+   "notes": "Chinese clone, one piece per rail, bought on Amazon US from a Shenzhen seller. Pack $261.31 + $10.00 delivery = $271.31. Seller states rail hole pitch 1.575 in, M3x10 rail bolts, MGN15H block 2.315 x 1.260 in, \"pre-loaded\"; no precision grade. Rejected: FSYGUTOU B0H8ZK7SSR at $130.59 per rail (seller has 2 ratings, 50% positive), XIA ZEWANG B0FDQGFHLX $162.50 per rail, Coavoo 2-pack B0D7CLBKD5 $309.22. An AliExpress one-piece rail of this length that ships to the US was not checked because of the IP block (candidates 3256808135010660, 3256813031237735). Import: Amazon US listing: price shown with no import line; no duty is added at Amazon checkout for this seller-fulfilled item as far as the page shows (checkout not viewed, no login). Shipping of $10.00 not included."
   },
   {
    "group": "Motion",
@@ -90,11 +90,11 @@
    "spec": "KGT MGN9 rail 3.94 in (100 mm part length) with 1 MGN9H block fitted (SKU \"Guide Length: 100mm\" + \"Color: MGN9H\")",
    "qty": 1.0,
    "unit": 5.72,
-   "ext": 17.35,
+   "ext": 5.72,
    "vendor": "KGT Factory Store (AliExpress)",
    "url": "https://www.aliexpress.us/item/2252799821165718.html",
    "status": "confirmed",
-   "notes": "$5.72 + $11.63 Express shipping = $17.35. 3.94 in instead of the buy list's 4.33 in: it is still cut to the 3.15 in the CAD uses (MGN9_RAIL_LEN) with an abrasive cut-off wheel, then deburred. The MGN9H block comes fitted, so the next line is $0. Seller states no preload or grade. Import: Item page shows no import charge, tax or duty line; checkout not viewed (needs login). Duty not included: see import_rules.txt."
+   "notes": "$5.72 + $11.63 Express shipping = $17.35. 3.94 in instead of the buy list's 4.33 in: it is still cut to the 3.15 in the CAD uses (MGN9_RAIL_LEN) with an abrasive cut-off wheel, then deburred. The MGN9H block comes fitted, so the next line is $0. Seller states no preload or grade. Import: Item page shows no import charge, tax or duty line; checkout not viewed (needs login). Duty not included: see import_rules.txt. Shipping of $11.63 not included."
   },
   {
    "group": "Motion",
@@ -126,11 +126,11 @@
    "spec": "\"GT2 Pulley Type Double Head Aluminum 20 Teeth Bore 5mm 6mm 6.35mm 8mm Width 9 mm Timing Pulley\", SKU \"Bore Diameter 5mm / Width 9mm / Number of Pcs 1pc\"",
    "qty": 3.0,
    "unit": 3.11,
-   "ext": 11.61,
+   "ext": 9.33,
    "vendor": "Ruiyong Official Store (AliExpress)",
    "url": "https://www.aliexpress.us/item/3256807523851196.html",
    "status": "provisional",
-   "notes": "Provisional: $3.11 each is the exact SKU price (50% sale, list $6.21). Shipping was read only at qty 1 ($2.28), so 3 x $3.11 + $2.28 = $11.61 uses that figure; qty-3 shipping is unconfirmed. Two set screws. Flange diameter not stated: check it against the 0.7087 in flange envelope (PULLEY_FLANGE_D) on arrival. Generic GT2 tooth profile, not Gates. Import: Item page shows no import charge or tax line (not logged in); checkout not viewed, no login."
+   "notes": "Provisional: $3.11 each is the exact SKU price (50% sale, list $6.21). Shipping was read only at qty 1 ($2.28), so 3 x $3.11 + $2.28 = $11.61 uses that figure; qty-3 shipping is unconfirmed. Two set screws. Flange diameter not stated: check it against the 0.7087 in flange envelope (PULLEY_FLANGE_D) on arrival. Generic GT2 tooth profile, not Gates. Import: Item page shows no import charge or tax line (not logged in); checkout not viewed, no login. Shipping of $2.28 not included."
   },
   {
    "group": "Motion",
@@ -174,11 +174,11 @@
    "spec": "GDW DS041MG 5KG Mini Metal Gear Servo; SKU Color: 1PCS DS041MG",
    "qty": 1.0,
    "unit": 14.02,
-   "ext": 16.19,
+   "ext": 14.02,
    "vendor": "SKYRCHOBBY Store (AliExpress)",
    "url": "https://www.aliexpress.us/item/3256803554063575.html",
    "status": "confirmed",
-   "notes": "GDW DS041MG, $14.02 (20% sale) + $2.17 shipping = $16.19. Seller history is thin (3 reviews, 24 sold). Not a true drop-in, printed bracket only: GDW lists 0.4685 x 1.2717 (over tabs) x 1.0000 in; other sellers list 0.9252 x 0.4567 x 1.0433 in; the HS-5065MG is 0.9291 x 0.4567 x 1.0236 in with a 1.2717 in tab span. Tab hole spacing (CAD 1.1260 in), tab height above the case bottom (CAD 0.6693-0.7480 in) and spline top height (CAD 1.1417 in) are not published, so the printed SERVO_BRACKET may need adjusting after measuring. Spline 25T, 0.1929 in diameter, vs Hitec 0.1969 in. Runs on 4.8-8.4 V. GDW's pulse scale is 1000-2000 us for 90 degrees, so min/max pulse in firmware/config.yaml is re-tuned on the bench. The title says \"analog\" while GDW lists it as digital: check on arrival. Import: Item page shows no import charge or tax line (not logged in); checkout not viewed, no login."
+   "notes": "GDW DS041MG, $14.02 (20% sale) + $2.17 shipping = $16.19. Seller history is thin (3 reviews, 24 sold). Not a true drop-in, printed bracket only: GDW lists 0.4685 x 1.2717 (over tabs) x 1.0000 in; other sellers list 0.9252 x 0.4567 x 1.0433 in; the HS-5065MG is 0.9291 x 0.4567 x 1.0236 in with a 1.2717 in tab span. Tab hole spacing (CAD 1.1260 in), tab height above the case bottom (CAD 0.6693-0.7480 in) and spline top height (CAD 1.1417 in) are not published, so the printed SERVO_BRACKET may need adjusting after measuring. Spline 25T, 0.1929 in diameter, vs Hitec 0.1969 in. Runs on 4.8-8.4 V. GDW's pulse scale is 1000-2000 us for 90 degrees, so min/max pulse in firmware/config.yaml is re-tuned on the bench. The title says \"analog\" while GDW lists it as digital: check on arrival. Import: Item page shows no import charge or tax line (not logged in); checkout not viewed, no login. Shipping of $2.17 not included."
   },
   {
    "group": "Motion",
@@ -186,15 +186,15 @@
    "spec": "KST \"25T-5 Aluminium Servo Arm Red for 5MM 25T Servo\", single arm, holes 0.2756 to 0.7677 in from the shaft axis",
    "qty": 1.0,
    "unit": 1.99,
-   "ext": 6.99,
+   "ext": 1.99,
    "vendor": "KST Servos web store kstservos.com (says it is an authorized distributor of KST)",
    "url": "https://kstservos.com/products/25t-5-red-aluminum-servo-arm-for-5mm-25t-servo",
    "status": "confirmed",
-   "notes": "KST 25T-5 aluminum arm, $1.99 + $5.00 shipping from kstservos.com (says it is an authorized KST distributor). Not a true drop-in: KST's 0.1969 in 25T spline on the GDW's 0.1929 in 25T output, fit unverified. Arm tip radius and thickness are not published (holes 0.2756-0.7677 in from the shaft); the CAD uses 0.8504 in radius, 0.0709 in thick. params.horn_lift() gives 0.6280 in lift at a 0.7480 in arm, 0.6476 in at 0.7874 in and 0.6791 in at 0.8504 in, all above the 0.4724 in minimum. Measure the horn plane before printing the LIFT_TAB. Import: Store page: 'Shipping, taxes, and discount codes calculated at checkout'; checkout not viewed, no login. No US duty statement on the store."
+   "notes": "KST 25T-5 aluminum arm, $1.99 + $5.00 shipping from kstservos.com (says it is an authorized KST distributor). Not a true drop-in: KST's 0.1969 in 25T spline on the GDW's 0.1929 in 25T output, fit unverified. Arm tip radius and thickness are not published (holes 0.2756-0.7677 in from the shaft); the CAD uses 0.8504 in radius, 0.0709 in thick. params.horn_lift() gives 0.6280 in lift at a 0.7480 in arm, 0.6476 in at 0.7874 in and 0.6791 in at 0.8504 in, all above the 0.4724 in minimum. Measure the horn plane before printing the LIFT_TAB. Import: Store page: 'Shipping, taxes, and discount codes calculated at checkout'; checkout not viewed, no login. No US duty statement on the store. Shipping of $5.00 not included."
   },
   {
    "group": "Frame & fasteners",
-   "item": "2040 extrusion, Y side members, 64.96 in (2)",
+   "item": "2040 extrusion, Y side members, 65 in (2)",
    "spec": "VEVOR 5-pack 2040 aluminum extrusion, V-slot, black anodized, 78.74 in bars (ASIN B0H1V17GZZ, variant Black / V 2040-2000mm / 5)",
    "qty": 2.0,
    "unit": 104.31,
@@ -202,7 +202,7 @@
    "vendor": "Amazon.com (VEVOR brand, sold and shipped by Amazon.com)",
    "url": "https://www.amazon.com/dp/B0H1V17GZZ",
    "status": "confirmed",
-   "notes": "Not from China (Amazon.com, sold and shipped by Amazon; VEVOR is a China-based brand). No China-shipped 2040 long enough was found: AliExpress mainland listings stop at 39.37-47.24 in, and the one 78.74 in AliExpress SKU says it cannot ship to a US address. One 5-pack ($104.31, free delivery) covers this line and the cross members: saw 2 x 64.96 in and 2 x 40.55 in from 4 bars, 1 bar spare. V-slot instead of 80/20 T-slot: same 20-series 6 mm slot, drop-in T-nuts fit. Shop work: square the cut ends and tap the end core bores M5; measure the core bore first (VEVOR's T-slot page says 0.1654 in). The T-slot version is $125.90. Import: US domestic retail order: no import charge; sales tax not included"
+   "notes": "Not from China (Amazon.com, sold and shipped by Amazon; VEVOR is a China-based brand). No China-shipped 2040 long enough was found: AliExpress mainland listings stop at 39.37-47.24 in, and the one 78.74 in AliExpress SKU says it cannot ship to a US address. One 5-pack ($104.31, free delivery) covers this line and the cross members: saw 2 x 65 in and 2 x 40.55 in from 4 bars, 1 bar spare. V-slot instead of 80/20 T-slot: same 20-series 6 mm slot, drop-in T-nuts fit. Shop work: square the cut ends and tap the end core bores M5; measure the core bore first (VEVOR's T-slot page says 0.1654 in). The T-slot version is $125.90. Import: US domestic retail order: no import charge; sales tax not included"
   },
   {
    "group": "Frame & fasteners",
@@ -270,11 +270,11 @@
    "spec": "DIN912 M3 x 10 mm, stainless steel 304, M3 50PCS pack x 4 (SKU to pick: Size \"M3 50PCS\", Length \"10mm\", Color \"stainless steel 304\")",
    "qty": 2.0,
    "unit": 1.57,
-   "ext": 10.5,
+   "ext": 6.28,
    "vendor": "Chang Da Hardware (AliExpress)",
    "url": "https://www.aliexpress.us/item/2255801088633543.html",
    "status": "provisional",
-   "notes": "Provisional: Default-variant price, exact SKU not confirmed. Chang Da Hardware sells 304 stainless DIN 912 in 50-piece packs; the price read ($1.57, sale ending Oct 7) was for the default M3x5 black SKU. 4 packs x $1.57 + $4.22 shipping = $10.50. The store's shipping is charged once, on this line, for all Chang Da lines; combined shipping is unconfirmed. Import: item page shows no import charge line; checkout not viewed (no login)"
+   "notes": "Provisional: Default-variant price, exact SKU not confirmed. Chang Da Hardware sells 304 stainless DIN 912 in 50-piece packs; the price read ($1.57, sale ending Oct 7) was for the default M3x5 black SKU. 4 packs x $1.57 + $4.22 shipping = $10.50. The store's shipping is charged once, on this line, for all Chang Da lines; combined shipping is unconfirmed. Import: item page shows no import charge line; checkout not viewed (no login) Shipping of $4.22 not included."
   },
   {
    "group": "Frame & fasteners",
@@ -318,11 +318,11 @@
    "spec": "DIN7991 M3 x 10 mm countersunk socket, stainless steel 304 (\"White\"), M3 -50pcs pack x 1 (SKU to pick: Size \"M3 -50pcs\", Length \"10mm\", Color \"White\")",
    "qty": 24.0,
    "unit": 1.22,
-   "ext": 4.99,
+   "ext": 1.22,
    "vendor": "wuhushiyu Store (AliExpress)",
    "url": "https://www.aliexpress.us/item/2255799834715941.html",
    "status": "provisional",
-   "notes": "Provisional: Default-variant price, exact SKU not confirmed: $1.22 for a 50-pack (default M3x4 SKU read) + $3.77 shipping = $4.99. The \"White\" color option is assumed to be the 304 stainless one, not confirmed. Import: item page shows no import charge line; checkout not viewed (no login)"
+   "notes": "Provisional: Default-variant price, exact SKU not confirmed: $1.22 for a 50-pack (default M3x4 SKU read) + $3.77 shipping = $4.99. The \"White\" color option is assumed to be the 304 stainless one, not confirmed. Import: item page shows no import charge line; checkout not viewed (no login) Shipping of $3.77 not included."
   },
   {
    "group": "Frame & fasteners",
@@ -474,11 +474,11 @@
    "spec": "N52 neodymium disc magnets, 6x3mm N52, 30pcs (SKU to pick: Color \"6x3mm N52\", Size \"30pcs\")",
    "qty": 10.0,
    "unit": 5.06,
-   "ext": 9.35,
+   "ext": 5.06,
    "vendor": "Powerful Magnet Discount Store (AliExpress)",
    "url": "https://www.aliexpress.us/item/3256809490870867.html",
    "status": "provisional",
-   "notes": "Provisional: Default-variant price, exact SKU not confirmed: $5.06 for 30 (the default 6x2 mm SKU was read) + $4.29 shipping = $9.35. Fits the 0.2441 x 0.1260 in pocket if the discs are nominal size; tolerance not stated. Import: item page shows no import charge line; checkout not viewed (no login)"
+   "notes": "Provisional: Default-variant price, exact SKU not confirmed: $5.06 for 30 (the default 6x2 mm SKU was read) + $4.29 shipping = $9.35. Fits the 0.2441 x 0.1260 in pocket if the discs are nominal size; tolerance not stated. Import: item page shows no import charge line; checkout not viewed (no login) Shipping of $4.29 not included."
   },
   {
    "group": "Frame & fasteners",
@@ -494,7 +494,7 @@
   },
   {
    "group": "Bed",
-   "item": "3/4 in MDF, 4 x 8 ft sheet (cut to 38.58 x 62.99 in)",
+   "item": "3/4 in MDF, 4 x 8 ft sheet (cut to 40.375 x 63 in)",
    "spec": "ULTRASTOCK 3/4 in x 4 ft x 8 ft MDF Panel, model D11612490970000, store SKU 201566 (Not from China)",
    "qty": 1.0,
    "unit": 49.98,
@@ -546,11 +546,11 @@
    "spec": "ESP32 GRBL FluidNC CNC Engraver Control Board 3/4 Axis, StepStick sockets + 5 V pulse/dir outputs for external drivers; variant \"Control Board\" (board only, no A4988)",
    "qty": 1.0,
    "unit": 18.16,
-   "ext": 25.85,
+   "ext": 18.16,
    "vendor": "Bolang-cnc Store (AliExpress), maker of the board (bolangsk.cn)",
    "url": "https://www.aliexpress.us/item/3256810507620353.html",
    "status": "confirmed",
-   "notes": "Not the 6x, so firmware/config.yaml and the wiring diagram change; no CAD change. The board runs FluidNC (the maker publishes a FluidNC config and schematic). 4 external step/dir ports through a 74HC245 at 5 V, no enable output to the drivers, 3 limit inputs, start/hold/reset inputs, buffered 5 V PWM for the servo. Not verified: that the buffer reliably takes the ESP32's 3.3 V and drives the CL42T step inputs. Bench check before wiring the motors. The 6x bought direct from Elecrow (Shenzhen) would be $49.00 + $15.14 duty-paid shipping = $64.14. Import: Item page shows no import charge or tax line; checkout not viewed (no login)"
+   "notes": "Not the 6x, so firmware/config.yaml and the wiring diagram change; no CAD change. The board runs FluidNC (the maker publishes a FluidNC config and schematic). 4 external step/dir ports through a 74HC245 at 5 V, no enable output to the drivers, 3 limit inputs, start/hold/reset inputs, buffered 5 V PWM for the servo. Not verified: that the buffer reliably takes the ESP32's 3.3 V and drives the CL42T step inputs. Bench check before wiring the motors. The 6x bought direct from Elecrow (Shenzhen) would be $49.00 + $15.14 duty-paid shipping = $64.14. Import: Item page shows no import charge or tax line; checkout not viewed (no login) Shipping of $7.69 not included."
   },
   {
    "group": "Electronics",
@@ -570,11 +570,11 @@
    "spec": "Banggood \"24V / 12V To 5V 5A DC-DC Buck Power Module Step Down Module\" (product 1308386), no options",
    "qty": 1.0,
    "unit": 4.99,
-   "ext": 8.98,
+   "ext": 4.99,
    "vendor": "Banggood (banggood.com)",
    "url": "https://www.banggood.com/24V-or-12V-To-5V-5A-DC-DC-Buck-Power-Module-Step-Down-Module-Power-Converter-p-1308386.html",
    "status": "provisional",
-   "notes": "Provisional: $4.99 + $3.99 shipping. 5 V, 5 A fixed output per the title; the description did not load, so specs beyond the title are unverified. Replaces the Pololu D24V22F5 inside the enclosure, no CAD change. Banggood ships free over $49.99 per order; not counted. Import: Banggood shows no import or duty line on the item page (checkout not viewed, no login). Duty not included: see import_rules.txt."
+   "notes": "Provisional: $4.99 + $3.99 shipping. 5 V, 5 A fixed output per the title; the description did not load, so specs beyond the title are unverified. Replaces the Pololu D24V22F5 inside the enclosure, no CAD change. Banggood ships free over $49.99 per order; not counted. Import: Banggood shows no import or duty line on the item page (checkout not viewed, no login). Duty not included: see import_rules.txt. Shipping of $3.99 not included."
   },
   {
    "group": "Electronics",
@@ -606,11 +606,11 @@
    "spec": "XKB Connection DM1-000P-1 micro switch, pin plunger, PC pins, 0.5039 x 0.2283 x 0.2598 in, 2 mounting holes 0.0787 in diameter at 0.2559 in (D2F-size clone), minimum order 5",
    "qty": 4.0,
    "unit": 0.15,
-   "ext": 11.65,
+   "ext": 0.74,
    "vendor": "LCSC Electronics (Shenzhen), part C692541",
    "url": "https://www.lcsc.com/product-detail/C692541.html",
    "status": "confirmed",
-   "notes": "XKB DM1-000P-1 from LCSC (Shenzhen): 5 pieces (4 + 1 spare) x $0.1477 + $7.91 shipping + $3.00 handling = $11.65. Same body and 2 mounting holes, 0.0787 in diameter at 0.2559 in, as the D2F (checked on the XKB drawing), so it fits the printed mount. Gold contacts not stated. Import: LCSC terms are FCA: duties and taxes are the buyer's, not shown in the cart"
+   "notes": "XKB DM1-000P-1 from LCSC (Shenzhen): 5 pieces (4 + 1 spare) x $0.1477 + $7.91 shipping + $3.00 handling = $11.65. Same body and 2 mounting holes, 0.0787 in diameter at 0.2559 in, as the D2F (checked on the XKB drawing), so it fits the printed mount. Gold contacts not stated. Import: LCSC terms are FCA: duties and taxes are the buyer's, not shown in the cart Shipping of $10.91 not included."
   },
   {
    "group": "Electronics",
@@ -690,11 +690,11 @@
    "spec": "Banggood Geekcreit \"75pcs For 221 Electrical Connectors\" (product 1964219), no options",
    "qty": 1.0,
    "unit": 8.99,
-   "ext": 12.98,
+   "ext": 8.99,
    "vendor": "Banggood (banggood.com)",
    "url": "https://www.banggood.com/75pcs-For-221-Electrical-Connectors-Wire-Block-Clamp-Terminal-Cable-Reusable-Mini-Quick-Home-Wire-Terminal-Connector-p-1964219.html",
    "status": "provisional",
-   "notes": "Provisional: $8.99 + $3.99 shipping. Clone of WAGO 221, not genuine. 75-piece mixed set: the split between 2-, 3- and 5-way did not load, so the number of 3-way pieces is unverified (buy list: 50 x 221-413). Import: Banggood shows no import or duty line on the item page (checkout not viewed, no login). Duty not included: see import_rules.txt."
+   "notes": "Provisional: $8.99 + $3.99 shipping. Clone of WAGO 221, not genuine. 75-piece mixed set: the split between 2-, 3- and 5-way did not load, so the number of 3-way pieces is unverified (buy list: 50 x 221-413). Import: Banggood shows no import or duty line on the item page (checkout not viewed, no login). Duty not included: see import_rules.txt. Shipping of $3.99 not included."
   },
   {
    "group": "Electronics",
@@ -702,11 +702,11 @@
    "spec": "Banggood \"1900pcs Terminal Block Cold-Pressed Insulated Ferrules\" (product 1877755), no options",
    "qty": 1.0,
    "unit": 4.99,
-   "ext": 8.98,
+   "ext": 4.99,
    "vendor": "Banggood (banggood.com)",
    "url": "https://www.banggood.com/1900pcs-Terminal-Block-Cold-Pressed-Insulated-Ferrules-Terminal-Block-Cord-End-Wire-Connector-Electrical-Crimp-Sleeves-p-1877755.html",
    "status": "provisional",
-   "notes": "Provisional: $4.99 + $3.99 shipping, 1900 pieces. The size range did not load, so coverage of 20-14 AWG is unverified. Alternative with a stated 22-5 AWG range: Banggood 1591168, $7.99 + $3.99. Import: Banggood shows no import or duty line on the item page (checkout not viewed, no login). Duty not included: see import_rules.txt."
+   "notes": "Provisional: $4.99 + $3.99 shipping, 1900 pieces. The size range did not load, so coverage of 20-14 AWG is unverified. Alternative with a stated 22-5 AWG range: Banggood 1591168, $7.99 + $3.99. Import: Banggood shows no import or duty line on the item page (checkout not viewed, no login). Duty not included: see import_rules.txt. Shipping of $3.99 not included."
   },
   {
    "group": "Electronics",
@@ -730,7 +730,7 @@
    "vendor": "Speedy Metals",
    "url": "https://www.speedymetals.com/pc-2408-8360-14-6061-t651-aluminum-plate.aspx",
    "status": "provisional",
-   "notes": "Provisional: Not from China: AliExpress plate is metric only; the nearest thickness (0.2362 in) is not the 0.2500 in PLATE_T, and 1/4 in is message-the-seller only. Holds every 1/4 in part now that the end plates and the pen carriage come from 5/16 in plate; the paper-stop strips (11.811 in) run along the 18 in side because Speedy Metals cuts to plus or minus 1/4 in, so a 12 x 12 in piece can be too short. $68.04 (Speedy Metals page, 2026-10-06) + $5.00 packaging fee from the Speedy Metals cart = $73.04; 12 x 24 in is $79.38. Shipping not found (shown only at checkout). Import: US source, no import; sales tax not included"
+   "notes": "Provisional: Not from China: AliExpress plate is metric only; the nearest thickness (0.2362 in) is not the 0.250 in PLATE_T, and 1/4 in is message-the-seller only. Holds every 1/4 in part now that the end plates and the pen carriage come from 5/16 in plate; the paper-stop strips (11.500 in) run along the 18 in side because Speedy Metals cuts to plus or minus 1/4 in. $68.04 (Speedy Metals page, 2026-10-06) + $5.00 packaging fee from the Speedy Metals cart = $73.04; 12 x 24 in is $79.38. Shipping not found (shown only at checkout). Import: US source, no import; sales tax not included"
   },
   {
    "group": "Aluminum stock for shop parts",
@@ -742,7 +742,7 @@
    "vendor": "Speedy Metals",
    "url": "https://www.speedymetals.com/p-2409-516-6061-t651-aluminum-plate.aspx",
    "status": "provisional",
-   "notes": "Provisional: Not from China: AliExpress plate is metric only. Oversize stock for the two gantry end plates and the pen carriage, faced both sides to 0.2500 in for the flatness of the rail-block seats. Two end plates side by side need about 16.2 in, so 12 x 12 in is too small; 12 x 18 in fits even at the minus 1/4 in cut tolerance. $86.09 (Speedy Metals page, 2026-10-06); 12 x 24 in is $100.44. Same Speedy Metals order as the 1/4 in plate; shipping not found. Import: US source, no import; sales tax not included"
+   "notes": "Provisional: Not from China: AliExpress plate is metric only. Oversize stock for the two gantry end plates and the pen carriage, faced both sides to 0.250 in for the flatness of the rail-block seats. Two 8 in end plates side by side need 16 in plus kerf, so 12 x 12 in is too small; 12 x 18 in fits even at the minus 1/4 in cut tolerance. $86.09 (Speedy Metals page, 2026-10-06); 12 x 24 in is $100.44. Same Speedy Metals order as the 1/4 in plate; shipping not found. Import: US source, no import; sales tax not included"
   },
   {
    "group": "Aluminum stock for shop parts",
