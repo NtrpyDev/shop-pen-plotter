@@ -14,7 +14,8 @@
   const has = (v) => v !== undefined && v !== null && v !== '';
   const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
   const BAR = 26, TOC = 40;
-  const TABS = ['summary', 'spend', 'done', 'machine', 'cost', 'parts'];
+  const TABS = ['summary', 'machine', 'cost', 'parts', 'files'];
+  const ALIAS = { spend: 'cost', done: 'files' };
 
   /* ---------- formatting ---------- */
   function usd(v, round) {
@@ -174,7 +175,6 @@
       preDate: txt(p.date),
       zero: 0,
       firstOrder: isNum(s1) && pens && isNum(pens[1]) ? Math.round(s1 + pens[1]) : null,
-      largestOrder: amts.length ? Math.max(...amts) : null,
       diyLow: cheapOk ? r50(b.total) : null,
       diyHigh: r50(rec.total),
       slideCost: m ? m[0] : 'TBD',
@@ -183,7 +183,7 @@
     };
     v.recDateLine = `parts only, priced ${recDate}`;
     v.cheapDateLine = v.cheapProvisional
-      ? `materials incl. shipping, priced ${v.cheapDate}; some prices provisional`
+      ? `parts only, priced ${v.cheapDate}; some prices provisional`
       : `parts only, priced ${v.cheapDate}`;
     v.preDateLine = `price read ${v.preDate}`;
     v.recNoteLine = rec.notes || '';
@@ -240,137 +240,6 @@
     const tb = h('tbody');
     (v.content.specs || []).forEach(([k, x]) => tb.append(h('tr', null, h('th', { scope: 'row' }, k), h('td', null, x))));
     t.append(tb);
-  }
-
-  /* B: stage staircase */
-  const stair = { items: [], total: 0, idx: 0, pinned: false, w: 0 };
-
-  function setStairActive(i) {
-    stair.idx = i;
-    const it = stair.items[i];
-    if (!it) return;
-    $('#sp-no').textContent = `Stage ${it.no}`;
-    $('#sp-name').textContent = it.name;
-    const c = $('#sp-cost');
-    c.textContent = usd(it.amt);
-    c.append(h('small', null, 'this stage'));
-    $('#sp-run').textContent = `Running total ${usd(it.to)}`;
-    $('#sp-desc').textContent = it.note || '';
-    $$('#stair-svg .st').forEach((g, k) => {
-      g.classList.toggle('next', stair.pinned && k > i);
-      g.classList.toggle('active', stair.pinned && k === i);
-    });
-  }
-
-  function wrapWords(t, max) {
-    const out = [];
-    let cur = '';
-    String(t).split(/\s+/).forEach((w) => {
-      if (cur && (cur + ' ' + w).length > max) { out.push(cur); cur = w; } else cur = cur ? cur + ' ' + w : w;
-    });
-    if (cur) out.push(cur);
-    return out;
-  }
-
-  function drawStair() {
-    const box = $('#stair-svg');
-    const items = stair.items;
-    if (!box || !items.length) return;
-    const W = Math.max(280, Math.round(box.clientWidth || 800));
-    stair.w = W;
-    const n = items.length;
-    const full = W >= 760;
-    const ml = full ? 68 : 54, mr = 8, mt = full ? 104 : 62, ph = full ? 330 : 250, mb = 30;
-    const slot = (W - ml - mr) / n;
-    const gap = full ? 18 : 6;
-    const bw = slot - gap;
-    const H = mt + ph + mb;
-    const max = stair.total;
-    const y = (x) => mt + ph - (x / max) * ph;
-    const svg = s('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, 'aria-hidden': 'true' });
-
-    for (let g = 0; g <= max; g += 500) {
-      svg.append(s('line', { class: 'grid-l', x1: ml, x2: W - mr, y1: y(g), y2: y(g) }));
-      svg.append(s('text', { class: 't-dim', x: ml - 8, y: y(g) + 4, 'text-anchor': 'end', 'font-size': 11 }, usd(g, true)));
-    }
-    svg.append(s('line', { class: 'grid-l grid-top', x1: ml, x2: W - mr, y1: y(max), y2: y(max) }));
-    svg.append(s('text', { class: 't-mark', x: ml + 4, y: y(max) - 7, 'font-size': 11 }, `TOTAL ${usd(max)}`));
-    svg.append(s('line', { x1: ml, x2: ml, y1: mt, y2: mt + ph, stroke: 'var(--dim)', 'stroke-width': 1 }));
-    svg.append(s('line', { x1: ml, x2: W - mr, y1: mt + ph, y2: mt + ph, stroke: 'var(--line)', 'stroke-width': 1 }));
-
-    const maxChars = Math.max(8, Math.floor(bw / 6.6));
-    let firstLabelTop = 0;
-    items.forEach((it, k) => {
-      const x0 = ml + k * slot + gap / 2;
-      const yt = y(it.to), yb = y(it.from);
-      const g = s('g', { class: `st${k === 0 ? ' first' : ''}` });
-      g.append(s('rect', { class: 'blk', x: x0, y: yt, width: bw, height: Math.max(1, yb - yt) }));
-      const cx = x0 + bw / 2;
-      const lines = full
-        ? [['t-dim', `STAGE ${it.no}`, 10], ...wrapWords(it.name, maxChars).map((t) => ['t-name', t, 12]), ['t-dim', `+${usd(it.amt)}`, 11], ['', usd(it.to), 11]]
-        : [['t-mark', it.no, 12], ['', usd(it.to, true), 11]];
-      lines.forEach(([cls, t, fs], i) => {
-        g.append(s('text', { class: cls, x: cx, y: yt - 8 - (lines.length - 1 - i) * (full ? 14 : 14), 'text-anchor': 'middle', 'font-size': fs }, t));
-      });
-      if (k === 0) firstLabelTop = yt - 8 - (lines.length - 1) * 14 - 11;
-      svg.append(g);
-      svg.append(s('text', { class: 't-dim', x: cx, y: mt + ph + 19, 'text-anchor': 'middle', 'font-size': 11 }, it.no));
-      if (k < n - 1) svg.append(s('line', { class: 'tread', x1: x0 + bw, x2: x0 + slot, y1: yt, y2: yt }));
-    });
-    const tx = ml + gap / 2;
-    const ty = firstLabelTop - 30;
-    const tag = s('g', null,
-      s('line', { x1: tx + 8, x2: tx + 8, y1: ty + 16, y2: firstLabelTop - 2, stroke: 'var(--mark)', 'stroke-width': 1 }),
-      s('rect', { class: 'tag-bg', x: tx, y: ty, width: 70, height: 16 }),
-      s('text', { class: 'tag-t', x: tx + 35, y: ty + 12, 'text-anchor': 'middle', 'font-size': 10 }, 'ORDER NOW'));
-    svg.append(tag);
-    box.replaceChildren(svg);
-    setStairActive(stair.idx);
-  }
-
-  function renderStairs(v) {
-    let run = 0;
-    stair.items = v.stages.map(([no, name, amt, note]) => {
-      const from = run;
-      run += isNum(amt) ? amt : 0;
-      return { no, name, amt, note, from, to: run };
-    });
-    stair.total = run;
-    if (!stair.items.length) return;
-    const ol = $('#stair-list');
-    stair.items.forEach((it) => ol.append(h('li', null,
-      h('span', { class: 'sl-no' }, `STAGE ${it.no}`),
-      h('span', { class: 'sl-name' }, it.name),
-      h('span', { class: 'sl-amt' }, usd(it.amt)),
-      h('span', { class: 'sl-desc' }, it.note || ''),
-      h('span', { class: 'sl-run' }, `Running total ${usd(it.to)}`))));
-    drawStair();
-    if ('ResizeObserver' in window) {
-      let t = null;
-      new ResizeObserver(() => {
-        const w = Math.round($('#stair-svg').clientWidth || 0);
-        if (Math.abs(w - stair.w) < 2) return;
-        clearTimeout(t);
-        t = setTimeout(() => { drawStair(); if (hasGsap()) window.ScrollTrigger.refresh(); }, 80);
-      }).observe($('#stair-svg'));
-    }
-  }
-
-  /* C: done tiles */
-  function renderDone(v) {
-    const sh = v.shop;
-    const progs = sh.programs || [];
-    const pr = sh.printed || {};
-    const printedQty = Array.isArray(pr.parts) ? pr.parts.reduce((a, x) => a + (isNum(x.qty) ? x.qty : 0), 0) : null;
-    const machined = (v.content.shop_parts || {}).machined_parts;
-    const tile = (node, label) => h('div', { class: 'dtile' }, h('dd', null, node), h('dt', null, label));
-    const dl = $('#done-tiles');
-    dl.append(
-      tile(cnt(progs.length, 'int', 'big num'), 'CNC programs, verified and backplotted'),
-      tile(cnt(machined, 'int', 'big num'), 'machined parts'),
-      tile(cnt(printedQty, 'int', 'big num'), `printed parts, ${num(pr.grams_est, 0)} g PETG`),
-      tile(cnt(0, 'int', 'big num'), 'hole-alignment fit failures'),
-      tile(cnt(0, 'int', 'big num'), 'collisions at all 4 travel corners, pen up and down'));
   }
 
   /* E: cards */
@@ -813,7 +682,8 @@
     requestAnimationFrame(() => { refreshST(); if (scrollState.update) scrollState.update(); heroResume(); });
   }
   const tabFromHash = () => {
-    const x = location.hash.slice(1);
+    const x0 = location.hash.slice(1);
+    const x = ALIAS[x0] || x0;
     return TABS.includes(x) ? x : null;
   };
 
@@ -848,6 +718,7 @@
     window.addEventListener('popstate', onNav);
     window.addEventListener('hashchange', () => { if (tabFromHash() && tabFromHash() !== tabState.cur) onNav(); });
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    if (ALIAS[location.hash.slice(1)] && tabFromHash()) history.replaceState(null, '', `#${tabFromHash()}`);
     showTab(tabFromHash() || 'summary', { scroll: false });
   }
 
@@ -931,7 +802,7 @@
     };
     $$('.sec-head').forEach((h) => { h.classList.add('dl-anim'); io.observe(h); });
     $$('[data-reveal]').forEach((el) => watch(el, 0));
-    [['#notes tbody tr', 0.14], ['#cards .card', 0.15], ['#done-tiles .dtile', 0.1]].forEach(([sel, st]) => {
+    [['#notes tbody tr', 0.14], ['#cards .card', 0.15]].forEach(([sel, st]) => {
       $$(sel).forEach((el, i) => watch(el, i * st));
     });
     const bars = $('#bars');
@@ -958,43 +829,11 @@
       /* headings, reveals and cost bars run on IntersectionObserver (setupReveals), not here:
          ScrollTriggers made inside hidden tab panels never played */
 
-      /* stage staircase: pinned, one step per slice of scroll */
-      const stairEl = $('#stair');
-      if (desk && stairEl && stair.items.length) {
-        mark(root, 'stair-on');
-        stair.pinned = true;
-        stair.idx = 0;
-        drawStair();
-        const n = stair.items.length;
-        ScrollTrigger.create({
-          trigger: stairEl, start: `top ${topPin}`, end: () => `+=${Math.round(window.innerHeight * 2.4)}`, pin: true, anticipatePin: 1, invalidateOnRefresh: true,
-          onUpdate: (self) => { const i = Math.min(n - 1, Math.floor(self.progress * n)); if (i !== stair.idx) setStairActive(i); },
-        });
-      }
-
-      /* drawings strip: vertical scroll moves it sideways */
-      const hs = $('#hs');
-      const view = $('#hs-view');
-      const track = $('#hs-track');
-      if (desk && hs && view && track) {
-        mark(root, 'hs-on');
-        const dist = () => {
-          const pad = parseFloat(getComputedStyle(view).paddingLeft) || 0;
-          return Math.max(0, Math.round(track.offsetWidth + 2 * pad - view.clientWidth));
-        };
-        gsap.to(track, {
-          x: () => -dist(), ease: 'none',
-          scrollTrigger: { trigger: hs, start: `top ${topPin}`, end: () => `+=${dist()}`, pin: true, scrub: true, anticipatePin: 1, invalidateOnRefresh: true },
-        });
-      }
-
       ScrollTrigger.sort();
       requestAnimationFrame(() => ScrollTrigger.refresh());
 
       return () => {
         added.forEach(([el, cls]) => el.classList.remove(cls));
-        stair.pinned = false;
-        drawStair();
       };
     });
   }
@@ -1067,12 +906,13 @@
     sc.add(model);
     const cam = new T.PerspectiveCamera(30, w / hgt, 5, 20000);
     cam.position.set(2300, 2000, 2700);
-    const c = new T.OrbitControls(cam, cv);
+    const c = new T.OrbitControls(cam, o.zone || cv);
     c.target.set(0, 0, 50);
     c.enableDamping = true;
-    c.enableZoom = false; // wheel zoom only with Ctrl or when the canvas is focused, so the page still scrolls
-    cv.style.touchAction = o.touch || 'none';
-    cv.addEventListener('wheel', (e) => { c.enableZoom = e.ctrlKey || document.activeElement === cv; }, { capture: true, passive: true });
+    c.enableZoom = false; // the wheel zooms only while Ctrl is held; otherwise it always scrolls the page
+    const dom = o.zone || cv;
+    dom.style.touchAction = o.touch || 'none';
+    dom.addEventListener('wheel', (e) => { c.enableZoom = e.ctrlKey; }, { capture: true, passive: true });
     const applySize = () => {
       [w, hgt] = sizeOf();
       r.setSize(w, hgt, false);
@@ -1099,7 +939,23 @@
     if (!heroState.stage) return;
     const el = $('#top');
     heroState.visible = tabState.cur === 'summary' && !!el && el.getBoundingClientRect().bottom > 0;
+    if (heroState.visible && heroState.placeZone) heroState.placeZone();
     if (heroState.visible && !heroState.raf) { heroState.stage.applySize(); heroState.raf = requestAnimationFrame(heroLoop); }
+  }
+  const hintState = { done: false };
+  function showHint() {
+    const el = $('#drag-hint');
+    if (!el || hintState.done) return;
+    if (mq('(hover: none)').matches) $('#drag-hint-t').textContent = 'Drag to rotate';
+    el.hidden = false;
+  }
+  function hideHint() {
+    const el = $('#drag-hint');
+    if (!el || hintState.done) return;
+    hintState.done = true;
+    el.classList.add('off');
+    if (reduce) { el.hidden = true; return; }
+    setTimeout(() => { el.hidden = true; }, 500);
   }
   async function setupHero3D() {
     const cv = $('#hero-3d');
@@ -1110,10 +966,34 @@
       if (!(probe.getContext('webgl2') || probe.getContext('webgl'))) return;
       const [T, g] = await Promise.all([loadThree(), loadModel()]);
       cv.hidden = false;
-      const st = makeStage(T, cv, g, { alpha: true, fill: true, shift: 0.17, touch: 'pan-y' });
+      const zone = $('#hero-zone');
+      const st = makeStage(T, cv, g, { alpha: true, fill: true, shift: 0.17, touch: 'pan-y', zone });
+      /* the drag box: right of the text and above the title block on desktop, the strip under the title block on phones */
+      const placeZone = () => {
+        const hr = hero.getBoundingClientRect();
+        const tb = $('.titleblock', hero);
+        const copy = $('#hero-copy');
+        if (!tb || !copy || !hr.width) return;
+        const t = tb.getBoundingClientRect();
+        let L, R, Tp, B;
+        if (window.innerWidth >= 900) {
+          L = copy.getBoundingClientRect().right + 24 - hr.left; R = hr.width - 16; Tp = 16; B = t.top - 12 - hr.top;
+        } else {
+          L = 0; R = hr.width; Tp = t.bottom + 12 - hr.top; B = hr.height;
+        }
+        const ok = R - L > 120 && B - Tp > 120;
+        zone.hidden = !ok;
+        Object.assign(zone.style, { left: `${Math.round(L)}px`, top: `${Math.round(Tp)}px`, width: `${Math.round(R - L)}px`, height: `${Math.round(B - Tp)}px` });
+      };
+      placeZone();
+      window.addEventListener('resize', placeZone);
+      heroState.placeZone = placeZone;
       st.c.autoRotate = !reduce;
       st.c.autoRotateSpeed = 0.8;
-      st.c.addEventListener('start', () => { st.c.autoRotate = false; });
+      let grabbed = false;
+      st.c.addEventListener('start', () => { st.c.autoRotate = false; grabbed = true; });
+      st.c.addEventListener('change', () => { if (grabbed) { grabbed = false; hideHint(); } });
+      showHint();
       heroState.stage = st;
       st.render();
       hero.classList.add('live');
@@ -1139,7 +1019,7 @@
         cv.hidden = false;
         const s = makeStage(T, cv, g, { alpha: false, touch: 'none' });
         s.applySize();
-        st.textContent = 'Drag to orbit, hold Ctrl and scroll (or click the model first) to zoom, right-drag to pan.';
+        st.textContent = 'Drag to orbit, hold Ctrl and scroll to zoom, right-drag to pan.';
         btn.hidden = true;
         refreshST();
         const ex = data && data.explode && typeof data.explode === 'object' ? data.explode : null;
@@ -1167,10 +1047,38 @@
     });
   }
 
+  /* Files tab: preview overlays */
+  function setupFiles() {
+    const sets = {
+      bp: [['assets/bp-carriage.jpg', 'Backplot of the pen carriage plate program', 'CNC backplot: pen carriage plate, side 2 facing and drilling'],
+        ['assets/bp-dock.jpg', 'Backplot of the pen dock program', 'CNC backplot: pen dock'],
+        ['assets/bp-xidler.jpg', 'Backplot of the X idler carrier program', 'CNC backplot: X idler carrier']],
+      pv: [['assets/prev-part.jpg', 'Plot preview of a DXF test part with a title block', 'Plot preview from the software: a DXF test part with a title block'],
+        ['assets/cal-frame.jpg', 'Plot preview of the 36 inch by 48 inch calibration frame', 'Plot preview: the 36" x 48" scale and squareness calibration frame']],
+    };
+    const ov = $('#lb-overlay');
+    const list = $('#lb-list');
+    if (!ov || !list) return;
+    let opener = null;
+    const close = () => { ov.hidden = true; if (opener) opener.focus(); };
+    $$('[data-lb]').forEach((b) => b.addEventListener('click', () => {
+      opener = b;
+      list.textContent = '';
+      sets[b.dataset.lb].forEach(([src, alt, cap]) => list.append(h('figure', null, h('img', { src, alt }), h('figcaption', null, cap))));
+      ov.hidden = false;
+      ov.scrollTop = 0;
+      $('#lb-close').focus();
+    }));
+    $('#lb-close').addEventListener('click', close);
+    ov.addEventListener('click', (e) => { if (e.target === ov || e.target === list) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !ov.hidden) close(); });
+  }
+
   /* ---------- boot ---------- */
   async function main() {
     guardImages();
     setupPairs();
+    setupFiles();
     setupScroll();
     setupTabs();
     setupTourMode();
@@ -1180,7 +1088,7 @@
     setupViewer(data);
     const v = derive(data);
     fillBindings(v);
-    const steps = [renderNotes, renderSpecs, renderStairs, renderDone, () => renderCards(data, v), renderBars, () => renderOthers(data),
+    const steps = [renderNotes, renderSpecs, () => renderCards(data, v), renderBars, () => renderOthers(data),
       () => renderMade(data.parts), () => renderPrograms(data), () => renderSheet(data, v), () => renderExploded(data.exploded)];
     steps.forEach((fn) => { try { fn(v); } catch (e) { console.error(e); } });
     if (missing.length) {
