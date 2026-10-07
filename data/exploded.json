@@ -1,0 +1,731 @@
+[
+ {
+  "id": "frame",
+  "title": "Frame and Y rails",
+  "image": "assets/exploded/frame.png",
+  "parts": [
+   {
+    "n": 1,
+    "name": "2040 aluminum extrusion, 64.96 in (side member)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 2,
+    "name": "2040 aluminum extrusion, 40.55 in (cross member)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 3,
+    "name": "MGN15 linear rail, 63.78 in",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 4,
+    "name": "MGN15H carriage block (Y axis)",
+    "qty": 4,
+    "kind": "bought"
+   },
+   {
+    "n": 5,
+    "name": "M3 x 10 socket head cap screw (Y rails)",
+    "qty": 82,
+    "kind": "bought"
+   },
+   {
+    "n": 6,
+    "name": "M3 drop-in T-nut, 6 mm slot (Y rails)",
+    "qty": 82,
+    "kind": "bought"
+   },
+   {
+    "n": 7,
+    "name": "Inside corner bracket, 20-series, with 2 M5 T-nuts and 2 M5 x 8 button head cap screws",
+    "qty": 8,
+    "kind": "bought"
+   }
+  ]
+ },
+ {
+  "id": "gantry",
+  "title": "Gantry beam and end plates",
+  "image": "assets/exploded/gantry.png",
+  "parts": [
+   {
+    "n": 1,
+    "name": "4080 aluminum extrusion, 43.39 in, ends tapped M5 (gantry beam)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 2,
+    "name": "Gantry end plate",
+    "qty": 2,
+    "kind": "machined"
+   },
+   {
+    "n": 3,
+    "name": "M5 x 16 flat head socket cap screw (end plates to beam)",
+    "qty": 8,
+    "kind": "bought"
+   },
+   {
+    "n": 4,
+    "name": "M3 x 10 flat head socket cap screw (Y carriage blocks to end plates)",
+    "qty": 16,
+    "kind": "bought"
+   }
+  ]
+ },
+ {
+  "id": "carriage",
+  "title": "X rails and carriage",
+  "image": "assets/exploded/carriage.png",
+  "parts": [
+   {
+    "n": 1,
+    "name": "4080 aluminum extrusion, 43.39 in, ends tapped M5 (gantry beam)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 2,
+    "name": "MGN15 linear rail, 43.31 in",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 3,
+    "name": "MGN15H carriage block (X axis)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 4,
+    "name": "Pen carriage plate",
+    "qty": 1,
+    "kind": "machined"
+   },
+   {
+    "n": 5,
+    "name": "M3 x 10 socket head cap screw (X rails)",
+    "qty": 56,
+    "kind": "bought"
+   },
+   {
+    "n": 6,
+    "name": "M3 drop-in T-nut, 6 mm slot (X rails)",
+    "qty": 56,
+    "kind": "bought"
+   },
+   {
+    "n": 7,
+    "name": "M3 x 10 flat head socket cap screw (carriage plate to blocks)",
+    "qty": 8,
+    "kind": "bought"
+   }
+  ]
+ },
+ {
+  "id": "pen-head",
+  "title": "Pen head",
+  "image": "assets/exploded/pen-head.png",
+  "parts": [
+   {
+    "n": 1,
+    "name": "Pen carriage plate",
+    "qty": 1,
+    "kind": "machined"
+   },
+   {
+    "n": 2,
+    "name": "MGN9 linear rail, cut to 3.15 in",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 3,
+    "name": "MGN9H carriage block",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 4,
+    "name": "Pen dock",
+    "qty": 1,
+    "kind": "machined"
+   },
+   {
+    "n": 5,
+    "name": "Dock stop",
+    "qty": 1,
+    "kind": "printed"
+   },
+   {
+    "n": 6,
+    "name": "Pen tool",
+    "qty": 3,
+    "kind": "printed"
+   },
+   {
+    "n": 7,
+    "name": "Pen, .24 to .63 in barrel",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 8,
+    "name": "Pen strap",
+    "qty": 6,
+    "kind": "printed"
+   },
+   {
+    "n": 9,
+    "name": "Servo bracket",
+    "qty": 1,
+    "kind": "printed"
+   },
+   {
+    "n": 10,
+    "name": "Micro servo, metal gear (HS-5065MG)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 11,
+    "name": "Aluminum servo horn, single arm, 25-tooth spline",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 12,
+    "name": "Lift tab",
+    "qty": 1,
+    "kind": "printed"
+   },
+   {
+    "n": 13,
+    "name": "Weight slug, 1/2 x 1 in steel bar",
+    "qty": 2,
+    "kind": "machined"
+   },
+   {
+    "n": 14,
+    "name": "M3 x 8 socket head cap screw (MGN9 rail)",
+    "qty": 4,
+    "kind": "bought"
+   },
+   {
+    "n": 15,
+    "name": "M3 x 5 socket head cap screw (dock to MGN9H block)",
+    "qty": 4,
+    "kind": "bought"
+   },
+   {
+    "n": 16,
+    "name": "4 x 12 mm dowel pin (dock)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 17,
+    "name": "6 x 3 mm N52 disc magnet (dock and pen tools)",
+    "qty": 8,
+    "kind": "bought"
+   },
+   {
+    "n": 18,
+    "name": "M3 brass heat-set insert (pen tools and lift tab)",
+    "qty": 13,
+    "kind": "bought"
+   },
+   {
+    "n": 19,
+    "name": "M3 x 10 socket head cap screw (lift tab)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 20,
+    "name": "M3 x 12 socket head cap screw (servo bracket)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 21,
+    "name": "Self-tapping screw (servo tabs)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 22,
+    "name": "M3 socket head cap screw, M3 x 8 to M3 x 20 by pen diameter (pen straps)",
+    "qty": 12,
+    "kind": "bought"
+   },
+   {
+    "n": 23,
+    "name": "Rubber strip, .04 in thick, .47 in wide (pen straps)",
+    "qty": 6,
+    "kind": "bought"
+   },
+   {
+    "n": 24,
+    "name": "M3 socket head cap screw (dock stop)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 25,
+    "name": "M3 socket head cap screw (weight slugs)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 26,
+    "name": "Pen setting gauge block",
+    "qty": 1,
+    "kind": "printed"
+   }
+  ]
+ },
+ {
+  "id": "drive-y",
+  "title": "Y drive",
+  "image": "assets/exploded/drive-y.png",
+  "parts": [
+   {
+    "n": 1,
+    "name": "Y motor/idler bracket A",
+    "qty": 2,
+    "kind": "machined"
+   },
+   {
+    "n": 2,
+    "name": "Y motor/idler bracket B (mirror of A)",
+    "qty": 2,
+    "kind": "machined"
+   },
+   {
+    "n": 3,
+    "name": "NEMA 17 closed-loop stepper motor with encoder",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 4,
+    "name": "20-tooth pulley, 2 mm pitch, 5 mm bore, 9 mm belt",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 5,
+    "name": "Y idler carrier",
+    "qty": 2,
+    "kind": "machined"
+   },
+   {
+    "n": 6,
+    "name": "Y idler spacer",
+    "qty": 2,
+    "kind": "printed"
+   },
+   {
+    "n": 7,
+    "name": "M5 flat washer",
+    "qty": 4,
+    "kind": "bought"
+   },
+   {
+    "n": 8,
+    "name": "20-tooth toothed idler, 2 mm pitch, 5 mm bore, 9 mm belt",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 9,
+    "name": "M5 x 35 socket head cap screw (idler axle)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 10,
+    "name": "Timing belt, 2 mm pitch, 9 mm wide",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 11,
+    "name": "Y belt clamp bar",
+    "qty": 2,
+    "kind": "machined"
+   },
+   {
+    "n": 12,
+    "name": "M3 socket head cap screw (motor mount)",
+    "qty": 8,
+    "kind": "bought"
+   },
+   {
+    "n": 13,
+    "name": "M5 socket head cap screw (brackets to frame)",
+    "qty": 16,
+    "kind": "bought"
+   },
+   {
+    "n": 14,
+    "name": "M5 drop-in T-nut (brackets to cross members)",
+    "qty": 8,
+    "kind": "bought"
+   },
+   {
+    "n": 15,
+    "name": "M5 socket head cap screw (idler carrier jack screw)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 16,
+    "name": "M3 socket head cap screw (Y belt clamp bars)",
+    "qty": 8,
+    "kind": "bought"
+   }
+  ]
+ },
+ {
+  "id": "drive-x",
+  "title": "X drive",
+  "image": "assets/exploded/drive-x.png",
+  "parts": [
+   {
+    "n": 1,
+    "name": "X motor/idler plate",
+    "qty": 2,
+    "kind": "machined"
+   },
+   {
+    "n": 2,
+    "name": "NEMA 17 closed-loop stepper motor with encoder",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 3,
+    "name": "20-tooth pulley, 2 mm pitch, 5 mm bore, 9 mm belt",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 4,
+    "name": "X idler carrier",
+    "qty": 1,
+    "kind": "machined"
+   },
+   {
+    "n": 5,
+    "name": "X belt tension block",
+    "qty": 1,
+    "kind": "machined"
+   },
+   {
+    "n": 6,
+    "name": "X idler spacer",
+    "qty": 1,
+    "kind": "printed"
+   },
+   {
+    "n": 7,
+    "name": "M5 flat washer",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 8,
+    "name": "20-tooth toothed idler, 2 mm pitch, 5 mm bore, 9 mm belt",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 9,
+    "name": "M5 x 35 socket head cap screw (idler axle)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 10,
+    "name": "Timing belt, 2 mm pitch, 9 mm wide",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 11,
+    "name": "X belt spacer",
+    "qty": 2,
+    "kind": "machined"
+   },
+   {
+    "n": 12,
+    "name": "X belt clamp bar",
+    "qty": 2,
+    "kind": "machined"
+   },
+   {
+    "n": 13,
+    "name": "M3 socket head cap screw (motor mount)",
+    "qty": 4,
+    "kind": "bought"
+   },
+   {
+    "n": 14,
+    "name": "M3 x 12 socket head cap screw (X idler carrier)",
+    "qty": 4,
+    "kind": "bought"
+   },
+   {
+    "n": 15,
+    "name": "M3 x 20 socket head cap screw (lower X belt clamp screws)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 16,
+    "name": "M3 x 25 socket head cap screw (upper X belt clamp screws, also hold the X chain bracket)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 17,
+    "name": "M4 socket head cap screw (tension block to idler plate)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 18,
+    "name": "M5 socket head cap screw (X belt tension screw, through the left end plate)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 19,
+    "name": "M5 socket head cap screw (motor/idler plates to beam)",
+    "qty": 6,
+    "kind": "bought"
+   },
+   {
+    "n": 20,
+    "name": "M5 drop-in T-nut (motor/idler plates to beam)",
+    "qty": 6,
+    "kind": "bought"
+   }
+  ]
+ },
+ {
+  "id": "bed",
+  "title": "Bed",
+  "image": "assets/exploded/bed.png",
+  "parts": [
+   {
+    "n": 1,
+    "name": "3/4 in MDF bed, 40.39 x 62.99 in",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 2,
+    "name": "24 gauge galvanized steel sheet, two 48 x 48 in sheets trimmed to the bed",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 3,
+    "name": "Paper corner stop bar",
+    "qty": 2,
+    "kind": "machined"
+   },
+   {
+    "n": 4,
+    "name": ".87 in (22 mm) rubber-coated neodymium magnet",
+    "qty": 30,
+    "kind": "bought"
+   },
+   {
+    "n": 5,
+    "name": "#8 flat head wood screw (paper stops)",
+    "qty": 6,
+    "kind": "bought"
+   },
+   {
+    "n": 6,
+    "name": "Contact cement, 1 quart (steel sheet to MDF)",
+    "qty": 1,
+    "kind": "bought"
+   }
+  ]
+ },
+ {
+  "id": "electronics",
+  "title": "Electronics and cable chains",
+  "image": "assets/exploded/electronics.png",
+  "parts": [
+   {
+    "n": 1,
+    "name": "Electronics enclosure",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 2,
+    "name": "Emergency stop station, 1.57 in red mushroom button, twist to release",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 3,
+    "name": "Cable chain, 10 x 20 mm inside, 39.4 in (Y axis)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 4,
+    "name": "Cable chain, 10 x 20 mm inside, cut to 31.5 in (X axis)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 5,
+    "name": "X cable chain bracket",
+    "qty": 1,
+    "kind": "printed"
+   },
+   {
+    "n": 6,
+    "name": "FluidNC 6x CNC controller",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 7,
+    "name": "Closed-loop stepper driver (comes with each motor)",
+    "qty": 3,
+    "kind": "bought"
+   },
+   {
+    "n": 8,
+    "name": "24 V 8.8 A power supply",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 9,
+    "name": "5 V 2.5 A step-down regulator (servo power)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 10,
+    "name": "Power inlet with switch and fuse holder (IEC C14)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 11,
+    "name": "Cable chain mounting bracket set",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 12,
+    "name": "M4 screw (X chain end to bracket)",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 13,
+    "name": "High-flex control cable, 4-conductor 20 AWG, feet",
+    "qty": 40,
+    "kind": "bought"
+   },
+   {
+    "n": 14,
+    "name": "High-flex shielded motor cable, 4-conductor 20 AWG, meters (X motor)",
+    "qty": 4,
+    "kind": "bought"
+   },
+   {
+    "n": 15,
+    "name": "Lever-nut splicing connectors, 3-wire, box of 50",
+    "qty": 1,
+    "kind": "bought"
+   },
+   {
+    "n": 16,
+    "name": "Insulated wire ferrule assortment",
+    "qty": 1,
+    "kind": "bought"
+   }
+  ]
+ },
+ {
+  "id": "switches",
+  "title": "Home switches",
+  "image": "assets/exploded/switches.png",
+  "parts": [
+   {
+    "n": 1,
+    "name": "X home switch bracket",
+    "qty": 1,
+    "kind": "printed"
+   },
+   {
+    "n": 2,
+    "name": "Y home switch bracket, right",
+    "qty": 1,
+    "kind": "printed"
+   },
+   {
+    "n": 3,
+    "name": "Y home switch bracket, left",
+    "qty": 1,
+    "kind": "printed"
+   },
+   {
+    "n": 4,
+    "name": "Microswitch, pin plunger (D2F-01)",
+    "qty": 3,
+    "kind": "bought"
+   },
+   {
+    "n": 5,
+    "name": "M2 x 12 pan head screw (X switch)",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 6,
+    "name": "M2 x 20 pan head screw (Y switches)",
+    "qty": 4,
+    "kind": "bought"
+   },
+   {
+    "n": 7,
+    "name": "M2 hex nut",
+    "qty": 2,
+    "kind": "bought"
+   },
+   {
+    "n": 8,
+    "name": "M5 socket head cap screw (switch brackets)",
+    "qty": 3,
+    "kind": "bought"
+   },
+   {
+    "n": 9,
+    "name": "M5 drop-in T-nut (switch brackets)",
+    "qty": 3,
+    "kind": "bought"
+   }
+  ]
+ }
+]
