@@ -5,14 +5,28 @@
    "part": "Gantry end plate OP1",
    "qty": 2,
    "setups": 1,
-   "est_minutes": 3.3
+   "est_minutes": 2.3
+  },
+  {
+   "program": "O60012_END_PLATE_OP2.nc",
+   "part": "Gantry end plate OP2",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 5.6
   },
   {
    "program": "O60021_PEN_CARRIAGE_OP1.nc",
    "part": "Pen carriage plate OP1",
    "qty": 1,
    "setups": 1,
-   "est_minutes": 3.1
+   "est_minutes": 0.9
+  },
+  {
+   "program": "O60022_PEN_CARRIAGE_OP2.nc",
+   "part": "Pen carriage plate OP2",
+   "qty": 1,
+   "setups": 1,
+   "est_minutes": 4.0
   },
   {
    "program": "O60031_PEN_DOCK_OP1.nc",
@@ -82,18 +96,25 @@
    "part": "X belt tension block OP1",
    "qty": 1,
    "setups": 1,
-   "est_minutes": 0.7
+   "est_minutes": 1.0
   },
   {
    "program": "O60112_X_TENSION_BLOCK_OP2.nc",
    "part": "X belt tension block OP2",
    "qty": 1,
    "setups": 1,
-   "est_minutes": 0.5
+   "est_minutes": 0.7
   },
   {
    "program": "O60121_PAPER_STOP_OP1.nc",
    "part": "Paper corner stop bar OP1",
+   "qty": 2,
+   "setups": 1,
+   "est_minutes": 0.7
+  },
+  {
+   "program": "O60122_PAPER_STOP_OP2.nc",
+   "part": "Paper corner stop bar OP2",
    "qty": 2,
    "setups": 1,
    "est_minutes": 0.5
@@ -113,15 +134,15 @@
    "est_minutes": 1.4
   }
  ],
- "total_cycle_hours": 0.8,
- "setup_hours_estimate": 8.5,
+ "total_cycle_hours": 1.0,
+ "setup_hours_estimate": 10.1,
  "assumptions": [
   "Rapids at 1000 ipm; feed moves at the programmed F; arcs and helical moves use true path length.",
   "Canned cycles: G81/G84/G85 feed from R to Z (G84 and G85 feed in and out at F); G83 pecks by Q with rapid back to R and rapid down again.",
   "Tool changes 5 s each; optional stops (M01) and dwell ignored.",
-  "Setup 15 min per program (16 programs, 1 setup each), plus 10 min per blank to saw and square (27 blanks, one per part run).",
+  "Setup 15 min per program (19 programs, 1 setup each), plus 10 min per blank to saw and square (32 blanks, one per part run).",
   "Estimate only: no machine acceleration, no operator load/unload time. Feeds are the conservative values in the programs.",
-  "Total spindle time = sum of (estimate per part x quantity) = 0.8 h; setup and blank prep = 4.0 h + 4.5 h."
+  "Total spindle time = sum of (estimate per part x quantity) = 1.0 h; setup and blank prep = 4.8 h + 5.3 h."
  ],
  "printed": {
   "parts": [
