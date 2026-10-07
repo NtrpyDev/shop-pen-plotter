@@ -22,8 +22,10 @@
 <script>
 document.documentElement.classList.add('js');
 (function () {
-  var ids = ['summary', 'spend', 'done', 'machine', 'cost', 'parts'];
+  var ids = ['summary', 'machine', 'cost', 'parts', 'files'];
   var h = (location.hash || '').slice(1);
+  if (h === 'spend') h = 'cost';
+  if (h === 'done') h = 'files';
   document.documentElement.setAttribute('data-tab', ids.indexOf(h) > -1 ? h : 'summary');
 })();
 </script>
@@ -44,11 +46,10 @@ document.documentElement.classList.add('js');
 <nav class="tabs mono" id="tabs" aria-label="Sections">
   <div class="tabs-in" id="tablist" role="tablist" aria-label="Proposal sections">
     <a role="tab" id="tab-summary" href="#summary" aria-controls="summary" data-tab="summary"><b>A</b> Summary</a>
-    <a role="tab" id="tab-spend" href="#spend" aria-controls="spend" data-tab="spend"><b>B</b> Spend</a>
-    <a role="tab" id="tab-done" href="#done" aria-controls="done" data-tab="done"><b>C</b> Done</a>
-    <a role="tab" id="tab-machine" href="#machine" aria-controls="machine" data-tab="machine"><b>D</b> Machine</a>
-    <a role="tab" id="tab-cost" href="#cost" aria-controls="cost" data-tab="cost"><b>E</b> Cost</a>
-    <a role="tab" id="tab-parts" href="#parts" aria-controls="parts" data-tab="parts"><b>F</b> Parts</a>
+    <a role="tab" id="tab-machine" href="#machine" aria-controls="machine" data-tab="machine"><b>B</b> Machine</a>
+    <a role="tab" id="tab-cost" href="#cost" aria-controls="cost" data-tab="cost"><b>C</b> Cost</a>
+    <a role="tab" id="tab-parts" href="#parts" aria-controls="parts" data-tab="parts"><b>D</b> Parts</a>
+    <a role="tab" id="tab-files" href="#files" aria-controls="files" data-tab="files"><b>E</b> Files</a>
   </div>
 </nav>
 
@@ -65,10 +66,11 @@ document.documentElement.classList.add('js');
   <div class="hero-bg" id="hero-bg">
     <div class="hero-model" id="hero-model">
       <img class="hero-poster" id="hero-poster" src="assets/iso.jpg" alt="Rendered pen plotter on its table, gantry midway over a blue sheet, pen head with orange printed parts" width="1400" height="1000">
-      <canvas id="hero-3d" tabindex="0" role="img" aria-label="Interactive 3D model of the pen plotter. Drag to orbit, hold Ctrl and scroll to zoom, right-drag to pan." hidden></canvas>
+      <canvas id="hero-3d" role="img" aria-label="Interactive 3D model of the pen plotter. Drag on the model to rotate it, hold Ctrl and scroll to zoom." hidden></canvas>
     </div>
   </div>
   <div class="hero-shade" aria-hidden="true"></div>
+  <p class="drag-hint" id="drag-hint" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20.5 3.5v4.6h-4.6"/></svg><span id="drag-hint-t">Drag to rotate · Ctrl + scroll to zoom</span></p>
   <div class="wrap hero-in" id="hero-in">
     <div class="hero-copy" id="hero-copy">
       <p class="kicker">Proposal for the shop</p>
@@ -82,10 +84,6 @@ document.documentElement.classList.add('js');
         <div class="stat">
           <dt>DIY price</dt>
           <dd><span class="big money" id="diy-range">TBD</span><span class="when">low-cost build to recommended build, materials</span></dd>
-        </div>
-        <div class="stat">
-          <dt>Largest single order</dt>
-          <dd><span class="big money" data-count="largestOrder" data-fmt="usd0">--</span><span class="when">stage 4, motion parts; each stage approved on its own</span></dd>
         </div>
       </dl>
       <noscript><p class="note">The figures on this page load from its data files and need JavaScript.</p></noscript>
@@ -101,6 +99,7 @@ document.documentElement.classList.add('js');
     </div>
     <div class="cue mono" aria-hidden="true"><span class="cue-line"></span><span>SCROLL</span></div>
   </div>
+  <div class="hero-zone" id="hero-zone" hidden></div>
 </header>
 
 <section class="sec" id="sum" aria-labelledby="sum-h">
@@ -119,77 +118,16 @@ document.documentElement.classList.add('js');
     <div class="table-wrap" data-reveal>
       <table class="data specs" id="specs"><caption class="sr">Specifications</caption></table>
     </div>
-    <p class="next"><a href="#spend" data-tab-link>Next: B Spend</a></p>
+    <p class="next"><a href="#machine" data-tab-link>Next: B Machine</a></p>
   </div>
 </section>
 </div>
 
-<!-- B Spend -->
-<div class="tabpanel" id="spend" role="tabpanel" aria-labelledby="tab-spend" tabindex="-1">
-<section class="sec" aria-labelledby="spend-h">
-  <div class="wrap">
-    <header class="sec-head"><span class="zone" aria-hidden="true">B</span><h2 id="spend-h">The ask and how the money goes out</h2><span class="dimline" aria-hidden="true"><i class="dl-start"></i><b class="dl-line"></b><i class="dl-end"></i></span></header>
-    <p class="ask" data-reveal data-text="content.ask">Approve a staged parts budget to build the plotter in the shop, starting with a small test order.</p>
-    <div class="stair" id="stair">
-      <figure class="stair-fig">
-        <figcaption class="chart-cap mono">Cumulative spend by stage, drawn to scale</figcaption>
-        <div class="stair-svg" id="stair-svg" role="img" aria-label="Staircase chart: cumulative spend after each of the six stages"></div>
-        <p class="stair-line">Each stage is approved separately. If the project stops after any stage, the most the shop has spent is that stage's running total.</p>
-      </figure>
-      <aside class="stair-panel" id="stair-panel" aria-live="polite" aria-label="Active stage">
-        <p class="sp-no mono" id="sp-no">Stage 1</p>
-        <h3 class="sp-name" id="sp-name"></h3>
-        <p class="sp-cost" id="sp-cost"></p>
-        <p class="sp-run mono" id="sp-run"></p>
-        <p class="sp-desc" id="sp-desc"></p>
-      </aside>
-    </div>
-    <ol class="stair-list" id="stair-list" aria-label="The six stages"></ol>
-    <p class="note" data-reveal data-text="recNoteLine"></p>
-    <p class="next"><a href="#done" data-tab-link>Next: C Done</a></p>
-  </div>
-</section>
-</div>
-
-<!-- C Done -->
-<div class="tabpanel" id="done" role="tabpanel" aria-labelledby="tab-done" tabindex="-1">
-<section class="sec" aria-labelledby="done-h">
-  <div class="wrap">
-    <header class="sec-head"><span class="zone" aria-hidden="true">C</span><h2 id="done-h">Done before a dollar is spent</h2><span class="dimline" aria-hidden="true"><i class="dl-start"></i><b class="dl-line"></b><i class="dl-end"></i></span></header>
-    <p class="prose" data-reveal>The design is finished and checked. All of this exists today and costs nothing to keep.</p>
-    <dl class="done-tiles" id="done-tiles" data-stagger></dl>
-    <ul class="deliver ticks" data-reveal>
-      <li>Parametric CAD model of the whole machine (STEP and STL for every part)</li>
-      <li>19 CNC programs with tool list, verifier report and backplots</li>
-      <li>Machined-part drawings, one page per setup (PDF)</li>
-      <li>Wiring diagram and FluidNC firmware settings</li>
-      <li>Plotting software: turns SVG, PDF or DXF into plot files, with a preview and a G-code checker</li>
-      <li>Calibration plots for scale, squareness, pen offsets and speeds</li>
-      <li>Buy list with every vendor link (CSV)</li>
-    </ul>
-  </div>
-  <div class="hs" id="hs">
-    <div class="wrap"><h3 class="hs-title">Drawings and backplots</h3></div>
-    <div class="hs-view" id="hs-view" tabindex="0" role="region" aria-label="Drawings and backplots, scrolls sideways">
-      <div class="hs-track" id="hs-track">
-        <figure class="frame frame-dark"><div class="frame-img"><img src="assets/prev-part.jpg" alt="Plot preview from the software: a DXF test part with a title block" width="706" height="1056" loading="lazy"></div><figcaption><span class="mono view-label">Frame 1</span>Plot preview from the software: a DXF test part with a title block</figcaption></figure>
-        <figure class="frame frame-dark"><div class="frame-img"><img src="assets/cal-frame.jpg" alt="Plot preview of the 36 inch by 48 inch scale and squareness calibration frame" width="808" height="1056" loading="lazy"></div><figcaption><span class="mono view-label">Frame 2</span>Plot preview: the 36" x 48" scale and squareness calibration frame</figcaption></figure>
-        <figure class="frame frame-light"><div class="frame-img"><img src="assets/bp-carriage.jpg" alt="Backplot of the pen carriage plate program, face mill passes and drilling" width="770" height="1305" loading="lazy"></div><figcaption><span class="mono view-label">Frame 3</span>CNC backplot: pen carriage plate, side 2 facing and drilling</figcaption></figure>
-        <figure class="frame frame-light"><div class="frame-img"><img src="assets/bp-dock.jpg" alt="Backplot of the pen dock program" width="770" height="600" loading="lazy"></div><figcaption><span class="mono view-label">Frame 4</span>CNC backplot: pen dock</figcaption></figure>
-        <figure class="frame frame-light"><div class="frame-img"><img src="assets/bp-xidler.jpg" alt="Backplot of the X idler carrier program" width="770" height="709" loading="lazy"></div><figcaption><span class="mono view-label">Frame 5</span>CNC backplot: X idler carrier</figcaption></figure>
-        <div class="frame frame-cta"><p class="cta-big">All 19 setups</p><a class="btn" href="assets/machined-parts-drawings.pdf">Open the drawings (PDF)</a></div>
-      </div>
-    </div>
-  </div>
-  <div class="wrap"><p class="next"><a href="#machine" data-tab-link>Next: D Machine</a></p></div>
-</section>
-</div>
-
-<!-- D Machine -->
+<!-- B Machine -->
 <div class="tabpanel" id="machine" role="tabpanel" aria-labelledby="tab-machine" tabindex="-1">
 <section class="sec" aria-labelledby="machine-h">
   <div class="wrap">
-    <header class="sec-head"><span class="zone" aria-hidden="true">D</span><h2 id="machine-h">The machine</h2><span class="dimline" aria-hidden="true"><i class="dl-start"></i><b class="dl-line"></b><i class="dl-end"></i></span></header>
+    <header class="sec-head"><span class="zone" aria-hidden="true">B</span><h2 id="machine-h">The machine</h2><span class="dimline" aria-hidden="true"><i class="dl-start"></i><b class="dl-line"></b><i class="dl-end"></i></span></header>
     <div class="tour" id="tour">
       <div class="tour-frame" id="tour-frame" aria-hidden="true">
         <div class="layer" data-step="0"><img src="assets/gantry.jpg" alt="" width="1400" height="1000" loading="lazy"></div>
@@ -261,16 +199,17 @@ document.documentElement.classList.add('js');
         <button class="btn" id="open3d" type="button">Open 3D model</button>
       </div>
     </figure>
-    <p class="next"><a href="#cost" data-tab-link>Next: E Cost</a></p>
+    <p class="next"><a href="#cost" data-tab-link>Next: C Cost</a></p>
   </div>
 </section>
 </div>
 
-<!-- E Cost -->
+<!-- C Cost -->
 <div class="tabpanel" id="cost" role="tabpanel" aria-labelledby="tab-cost" tabindex="-1">
 <section class="sec" aria-labelledby="cost-h">
   <div class="wrap">
-    <header class="sec-head"><span class="zone" aria-hidden="true">E</span><h2 id="cost-h">Build it or buy it</h2><span class="dimline" aria-hidden="true"><i class="dl-start"></i><b class="dl-line"></b><i class="dl-end"></i></span></header>
+    <header class="sec-head"><span class="zone" aria-hidden="true">C</span><h2 id="cost-h">Build it or buy it</h2><span class="dimline" aria-hidden="true"><i class="dl-start"></i><b class="dl-line"></b><i class="dl-end"></i></span></header>
+    <div class="notice" role="note"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 7v6.5"/><circle cx="12" cy="17" r="1.1"/></svg><p>All prices are estimates and do not include shipping or tax. They were read from vendor websites on October 5 and 6, 2026, and will change. Every stage is re-priced right before it is ordered.</p></div>
     <p class="prose" id="cost-intro" data-reveal></p>
 
     <div class="cards" id="cards">
@@ -304,16 +243,16 @@ document.documentElement.classList.add('js');
       <summary>Other pre-built machines checked</summary>
       <div class="table-wrap"><table class="data others" id="others"></table></div>
     </details>
-    <p class="next"><a href="#parts" data-tab-link>Next: F Parts</a></p>
+    <p class="next"><a href="#parts" data-tab-link>Next: D Parts</a></p>
   </div>
 </section>
 </div>
 
-<!-- F Parts -->
+<!-- D Parts -->
 <div class="tabpanel" id="parts" role="tabpanel" aria-labelledby="tab-parts" tabindex="-1">
 <section class="sec" aria-labelledby="parts-h">
   <div class="wrap">
-    <header class="sec-head"><span class="zone" aria-hidden="true">F</span><h2 id="parts-h">Parts</h2><span class="dimline" aria-hidden="true"><i class="dl-start"></i><b class="dl-line"></b><i class="dl-end"></i></span></header>
+    <header class="sec-head"><span class="zone" aria-hidden="true">D</span><h2 id="parts-h">Parts</h2><span class="dimline" aria-hidden="true"><i class="dl-start"></i><b class="dl-line"></b><i class="dl-end"></i></span></header>
 
     <div id="made-wrap" hidden>
       <h3 class="blk-h">Made parts</h3>
@@ -352,12 +291,82 @@ document.documentElement.classList.add('js');
 </section>
 </div>
 
+<!-- E Files -->
+<div class="tabpanel" id="files" role="tabpanel" aria-labelledby="tab-files" tabindex="-1">
+<section class="sec" aria-labelledby="files-h">
+  <div class="wrap">
+    <header class="sec-head"><span class="zone" aria-hidden="true">E</span><h2 id="files-h">Files</h2><span class="dimline" aria-hidden="true"><i class="dl-start"></i><b class="dl-line"></b><i class="dl-end"></i></span></header>
+    <ul class="fgrid" id="fgrid">
+        <li class="fcard">
+          <div class="fc-media fc-prev"><img src="assets/drawings/O60011.png" alt="First page of the machined-part drawings" loading="lazy"></div>
+          <h3>Machined-part drawings (PDF)</h3>
+          <p>One page per setup for every machined part.</p>
+          <a class="btn fc-act" href="assets/machined-parts-drawings.pdf">Download PDF</a>
+        </li>
+        <li class="fcard">
+          <div class="fc-media"><svg class="fc-ic" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false"><rect x="6" y="9" width="36" height="30"/><path d="M6 19h36M6 29h36M20 9v30"/></svg></div>
+          <h3>Buy list, recommended build (CSV)</h3>
+          <p>Every part in the recommended build with its vendor link.</p>
+          <a class="btn fc-act" href="assets/buy-list.csv" download>Download CSV</a>
+        </li>
+        <li class="fcard">
+          <div class="fc-media fc-prev"><img src="assets/bp-carriage.jpg" alt="Backplot of the pen carriage plate program" loading="lazy"></div>
+          <h3>CNC program backplots</h3>
+          <p>Toolpath pictures for the pen carriage plate, pen dock and X idler carrier.</p>
+          <button class="btn fc-act" type="button" data-lb="bp">View</button>
+        </li>
+        <li class="fcard">
+          <div class="fc-media fc-prev"><img src="assets/prev-part.jpg" alt="Plot preview of a test part with a title block" loading="lazy"></div>
+          <h3>Plot previews from the plotting software</h3>
+          <p>What the software shows before it plots a drawing.</p>
+          <button class="btn fc-act" type="button" data-lb="pv">View</button>
+        </li>
+        <li class="fcard">
+          <div class="fc-media"><svg class="fc-ic" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false"><path d="M18 14L8 24l10 10M30 14l10 10-10 10"/><path d="M27 10l-6 28"/></svg></div>
+          <h3>CNC programs (19 programs)</h3>
+          <p>Every machined part, ready to run on the VF-3SS or any 3-axis mill.</p>
+          <span class="fc-na mono">Available from Noah</span>
+        </li>
+        <li class="fcard">
+          <div class="fc-media"><svg class="fc-ic" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false"><path d="M24 5l16 9v20l-16 9-16-9V14z"/><path d="M8 14l16 9 16-9M24 23v20"/></svg></div>
+          <h3>CAD models (STEP and STL for every part)</h3>
+          <p>The whole machine as a parametric model, one file per part.</p>
+          <span class="fc-na mono">Available from Noah</span>
+        </li>
+        <li class="fcard">
+          <div class="fc-media"><svg class="fc-ic" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false"><circle cx="9" cy="12" r="3"/><circle cx="9" cy="36" r="3"/><circle cx="39" cy="24" r="3"/><path d="M12 12h10l6 12h8M12 36h10l6-12"/></svg></div>
+          <h3>Wiring diagram and FluidNC firmware settings</h3>
+          <p>Power supply, E-stop, motor drivers, home switches and pen servo wiring, plus the controller settings.</p>
+          <span class="fc-na mono">Available from Noah</span>
+        </li>
+        <li class="fcard">
+          <div class="fc-media"><svg class="fc-ic" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false"><path d="M6 40L40 6"/><path d="M30 6h10v10"/><path d="M8 12c8 0 8 10 16 10s8-10 16-10" transform="translate(0 14)"/></svg></div>
+          <h3>Plotting software and calibration plots</h3>
+          <p>Turns SVG, PDF or DXF into plot files, plus plots for scale, squareness and pen offsets.</p>
+          <span class="fc-na mono">Available from Noah</span>
+        </li>
+        <li class="fcard">
+          <div class="fc-media"><svg class="fc-ic" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false"><rect x="5" y="16" width="38" height="16"/><path d="M13 16v7M21 16v10M29 16v7M37 16v10"/></svg></div>
+          <h3>Tolerance list</h3>
+          <p>Every GD&amp;T callout on the drawings, with the reasoning behind its value.</p>
+          <span class="fc-na mono">Available from Noah</span>
+        </li>
+    </ul>
+  </div>
+</section>
+</div>
+
 </main>
 
 <div class="prog-pv" id="prog-pv" hidden aria-hidden="true"><img alt="" width="520"></div>
 <div class="pv-overlay" id="pv-overlay" hidden role="dialog" aria-modal="true" aria-label="Drawing preview">
   <button class="btn pv-close" type="button" id="pv-close">Close</button>
   <img alt="Drawing page for the selected CNC program">
+</div>
+
+<div class="pv-overlay lb-overlay" id="lb-overlay" hidden role="dialog" aria-modal="true" aria-label="Preview images">
+  <button class="btn pv-close" type="button" id="lb-close">Close</button>
+  <div class="lb-list" id="lb-list"></div>
 </div>
 
 <footer class="foot">
